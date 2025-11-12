@@ -2,43 +2,44 @@
 
 import * as React from "react"
 import { TrendingUp, TrendingDown, ArrowRightLeft, Users } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
+import { useUser } from "@/contexts/user-context"
+import { CountingNumber } from "@/components/animate-ui/primitives/texts/counting-number"
 
 export function AllActivity() {
+  const { user, loading } = useUser()
 
-  // 预留假数据
   const stats = React.useMemo(() => ({
-    totalReceive: 1234.56,
-    totalPayment: 567.89,
-    totalTransfer: 890.12,
-    totalCommunity: 345.67
-  }), [])
+    totalReceive: user?.total_receive ?? 0,
+    totalPayment: user?.total_payment ?? 0,
+    totalTransfer: user?.total_transfer ?? 0,
+    totalCommunity: user?.total_community ?? 0
+  }), [user])
 
   const statCards = [
     {
       title: "总收款",
-      value: stats.totalReceive.toFixed(2),
+      value: loading ? '-' : <CountingNumber number={stats.totalReceive} decimalPlaces={2} />,
       icon: TrendingUp,
       color: "text-green-600",
       bgColor: "bg-green-100 dark:bg-green-900/20"
     },
     {
       title: "总付款",
-      value: stats.totalPayment.toFixed(2),
+      value: loading ? '-' : <CountingNumber number={stats.totalPayment} decimalPlaces={2} />,
       icon: TrendingDown,
       color: "text-red-600",
       bgColor: "bg-red-100 dark:bg-red-900/20"
     },
     {
       title: "总转账",
-      value: stats.totalTransfer.toFixed(2),
+      value: loading ? '-' : <CountingNumber number={stats.totalTransfer} decimalPlaces={2} />,
       icon: ArrowRightLeft,
       color: "text-blue-600",
       bgColor: "bg-blue-100 dark:bg-blue-900/20"
     },
     {
       title: "总社区划转",
-      value: stats.totalCommunity.toFixed(2),
+      value: loading ? '-' : <CountingNumber number={stats.totalCommunity} decimalPlaces={2} />,
       icon: Users,
       color: "text-purple-600",
       bgColor: "bg-purple-100 dark:bg-purple-900/20"
@@ -70,8 +71,6 @@ export function AllActivity() {
           })}
         </div>
       </div>
-
-      <Separator className="my-6" />
     </>
   )
 }

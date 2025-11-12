@@ -18,7 +18,8 @@ export function BalanceSummary() {
 
   // 从用户信息中获取余额数据
   const available = user?.available_balance ?? 0
-  const total = user?.total_balance ?? 0
+  const community = user?.community_balance ?? 0
+  const total = available + community
   const pending = total - available
 
   const pendingPercent = total > 0 

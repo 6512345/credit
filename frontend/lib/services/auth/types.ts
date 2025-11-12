@@ -42,12 +42,20 @@ export interface User {
   trust_level: TrustLevel;
   /** 头像 URL */
   avatar_url: string;
-  /** 支付分数 */
-  pay_score: number;
-  /** 总余额 */
-  total_balance: number;
+  /** 总接收金额 */
+  total_receive: number;
+  /** 总支付金额 */
+  total_payment: number;
+  /** 总转账金额 */
+  total_transfer: number;
+  /** 总社区金额 */
+  total_community: number;
+  /** 社区余额 */
+  community_balance: number;
   /** 可用余额 */
   available_balance: number;
+  /** 支付分数 */
+  pay_score: number;
   /** 当日剩余配额 */
   remain_quota: number;
   /** 支付等级 */

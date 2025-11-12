@@ -19,7 +19,7 @@ import { CountingNumber } from "@/components/animate-ui/primitives/texts/countin
 export function BalanceMain() {
   const { user, loading } = useUser()
 
-  const totalBalance = user?.total_balance ?? 0
+  const totalBalance = (user?.available_balance ?? 0) + (user?.community_balance ?? 0)
 
   return (
     <div className="py-6">
