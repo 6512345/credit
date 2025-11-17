@@ -68,10 +68,16 @@ type GetOrderRequest struct {
 	OrderNo string `form:"order_no" json:"order_no" binding:"required"`
 }
 
+// MerchantInfo 商户信息
+type MerchantInfo struct {
+	AppName string `json:"app_name"`
+}
+
 // GetOrderResponse 查询订单响应
 type GetOrderResponse struct {
 	Order         *model.Order         `json:"order"`
 	UserPayConfig *model.UserPayConfig `json:"user_pay_config"`
+	Merchant      MerchantInfo         `json:"merchant"`
 }
 
 // CreateMerchantOrder 商户创建订单接口
@@ -197,9 +203,20 @@ func GetMerchantOrder(c *gin.Context) {
 	}
 	order.PayerUsername = orderCtx.CurrentUser.Username
 
+	var merchant model.MerchantAPIKey
+	if err := db.DB(c.Request.Context()).
+		Where("client_id = ?", order.ClientID).
+		First(&merchant).Error; err != nil {
+		c.JSON(http.StatusNotFound, util.Err(MerchantInfoNotFound))
+		return
+	}
+
 	c.JSON(http.StatusOK, util.OK(GetOrderResponse{
 		Order:         &order,
 		UserPayConfig: orderCtx.PayConfig,
+		Merchant: MerchantInfo{
+			AppName: merchant.AppName,
+		},
 	}))
 }
 
