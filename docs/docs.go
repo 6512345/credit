@@ -800,7 +800,7 @@ const docTemplate = `{
                         "expired",
                         "disputing",
                         "refund",
-                        "refunded"
+                        "refused"
                     ]
                 },
                 "type": {

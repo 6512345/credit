@@ -30,5 +30,7 @@ const (
 
 const (
 	// OrderMerchantIDCacheKeyFormat Redis key 格式，用于存储订单号对应的商户ID
-	OrderMerchantIDCacheKeyFormat = "payment:order:merchant:%s"
+	OrderMerchantIDCacheKeyFormat = "payment:order:%s"
+	// OrderExpireKeyFormat Redis key 格式，用于订单过期监听，key中包含订单ID
+	OrderExpireKeyFormat = "payment:order:expire:%d"
 )

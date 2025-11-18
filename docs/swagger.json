@@ -791,7 +791,7 @@
                         "expired",
                         "disputing",
                         "refund",
-                        "refunded"
+                        "refused"
                     ]
                 },
                 "type": {

@@ -76,7 +76,7 @@ definitions:
         - expired
         - disputing
         - refund
-        - refunded
+        - refused
         type: string
       type:
         enum:

@@ -37,6 +37,7 @@ import (
 	"time"
 
 	"github.com/linux-do/pay/internal/apps/admin"
+	"github.com/linux-do/pay/internal/listener"
 
 	"github.com/linux-do/pay/internal/apps/payment"
 
@@ -52,7 +53,6 @@ import (
 	"github.com/linux-do/pay/internal/apps/order"
 	"github.com/linux-do/pay/internal/apps/user"
 	"github.com/linux-do/pay/internal/config"
-	"github.com/linux-do/pay/internal/model"
 	"github.com/linux-do/pay/internal/otel_trace"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -181,6 +181,12 @@ func Serve() {
 		}
 	}
 
+	expireListenerCtx, expireListenerCancel := context.WithCancel(context.Background())
+
+	if err := listener.StartExpireListener(expireListenerCtx); err != nil {
+		log.Fatalf("[API] 警告: 启动过期监听器失败: %v\n", err)
+	}
+
 	srv := &http.Server{
 		Addr:    config.Config.App.Addr,
 		Handler: r,
@@ -197,15 +203,13 @@ func Serve() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("[API] server shutting down...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(config.Config.App.GracefulShutdownTimeout)*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Duration(config.Config.App.GracefulShutdownTimeout)*time.Second)
 	defer cancel()
+	defer expireListenerCancel()
 
-	model.ExpirePendingOrders(ctx)
-	otel_trace.Shutdown(ctx)
+	otel_trace.Shutdown(shutdownCtx)
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Fatalf("[API] server forced to shutdown: %v\n", err)
 	}
 

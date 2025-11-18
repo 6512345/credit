@@ -54,7 +54,7 @@ const (
 	OrderStatusExpired   OrderStatus = "expired"
 	OrderStatusDisputing OrderStatus = "disputing"
 	OrderStatusRefund    OrderStatus = "refund"
-	OrderStatusRefunding OrderStatus = "refunding"
+	OrderStatusRefused   OrderStatus = "refused"
 )
 
 type Order struct {
@@ -81,15 +81,15 @@ func (o *Order) AfterFind(*gorm.DB) error {
 	return nil
 }
 
-// ExpirePendingOrders 将所有 pending 状态的订单设置为 expired
+// ExpirePendingOrders 将已过期且 pending 状态的订单设置为 expired
 func ExpirePendingOrders(ctx context.Context) {
 	result := db.DB(ctx).Model(&Order{}).
-		Where("status = ?", OrderStatusPending).
+		Where("status = ? AND expires_at <= ?", OrderStatusPending, time.Now()).
 		Update("status", OrderStatusExpired)
 
 	if result.Error != nil {
 		logger.ErrorF(ctx, "过期 pending 订单失败: %v", result.Error)
 	} else {
-		logger.InfoF(ctx, "已将 %d 个 pending 订单设置为 expired", result.RowsAffected)
+		logger.InfoF(ctx, "已将 %d 个已过期的 pending 订单设置为 expired", result.RowsAffected)
 	}
 }
