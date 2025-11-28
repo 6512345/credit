@@ -89,8 +89,8 @@ func ListTransactions(c *gin.Context) {
 
 		switch orderType {
 		case model.OrderTypeReceive:
-			// receive 类型：查询当前用户作为收款方的所有订单
-			baseQuery = baseQuery.Where("orders.payee_user_id = ?", user.ID)
+			// receive 类型：查询当前用户作为收款方的 payment 订单
+			baseQuery = baseQuery.Where("orders.type = ? AND orders.payee_user_id = ?", model.OrderTypePayment, user.ID)
 		case model.OrderTypeCommunity:
 			// community 类型：查询当前用户作为收款方的 community 订单
 			baseQuery = baseQuery.Where("orders.type = ? AND orders.payee_user_id = ?", orderType, user.ID)
@@ -132,6 +132,13 @@ func ListTransactions(c *gin.Context) {
 	if err := baseQuery.Order("orders.created_at DESC").Offset(offset).Limit(req.PageSize).Find(&response.Orders).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, util.Err(err.Error()))
 		return
+	}
+
+	// 转换订单类型：从收款方视角看，payment 订单应该显示为 receive
+	for i := range response.Orders {
+		if response.Orders[i].Type == model.OrderTypePayment && response.Orders[i].PayeeUserID == user.ID {
+			response.Orders[i].Type = model.OrderTypeReceive
+		}
 	}
 
 	c.JSON(http.StatusOK, util.OK(response))
