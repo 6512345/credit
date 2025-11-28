@@ -34,6 +34,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/linux-do/pay/internal/apps/oauth"
 	"github.com/linux-do/pay/internal/config"
 
 	"github.com/gin-gonic/gin"
@@ -81,6 +82,15 @@ type GetOrderResponse struct {
 	Merchant      MerchantInfo         `json:"merchant"`
 }
 
+// TransferRequest 转账请求
+type TransferRequest struct {
+	RecipientID       uint64          `json:"recipient_id" binding:"required"`
+	RecipientUsername string          `json:"recipient_username" binding:"required"`
+	Amount            decimal.Decimal `json:"amount" binding:"required"`
+	PayKey            string          `json:"pay_key" binding:"required"`
+	Remark            string          `json:"remark"`
+}
+
 // CreateMerchantOrder 商户创建订单接口
 // @Tags payment
 // @Accept json
@@ -118,16 +128,9 @@ func CreateMerchantOrder(c *gin.Context) {
 	}
 
 	// 获取商家订单过期时间（分钟）
-	var systemConfig model.SystemConfig
-	if err := systemConfig.GetByKey(c.Request.Context(), model.ConfigKeyMerchantOrderExpireMinutes); err != nil {
+	expireMinutes, err := model.GetIntByKey(c.Request.Context(), model.ConfigKeyMerchantOrderExpireMinutes)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, util.Err(err.Error()))
-		return
-	}
-
-	// 将配置值转换为 int 类型
-	expireMinutes, errMinutes := strconv.Atoi(systemConfig.Value)
-	if errMinutes != nil {
-		c.JSON(http.StatusInternalServerError, util.Err(fmt.Sprintf(SystemConfigValueInvalid, model.ConfigKeyMerchantOrderExpireMinutes, errMinutes)))
 		return
 	}
 
@@ -388,6 +391,111 @@ func PayMerchantOrder(c *gin.Context) {
 
 	// 异步回调商户
 	//go notifyMerchant(c.Request.Context(), &order)
+
+	c.JSON(http.StatusOK, util.OKNil())
+}
+
+// Transfer 用户转账接口
+// @Tags payment
+// @Accept json
+// @Produce json
+// @Param request body TransferRequest true "转账请求"
+// @Success 200 {object} util.ResponseAny
+// @Router /api/v1/payment/transfer [post]
+func Transfer(c *gin.Context) {
+	var req TransferRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, util.Err(err.Error()))
+		return
+	}
+
+	if req.Amount.LessThanOrEqual(decimal.Zero) {
+		c.JSON(http.StatusBadRequest, util.Err(AmountMustBeGreaterThanZero))
+		return
+	}
+
+	if req.Amount.Exponent() < -2 {
+		c.JSON(http.StatusBadRequest, util.Err(AmountDecimalPlacesExceeded))
+		return
+	}
+
+	currentUser, _ := oauth.GetUserFromContext(c)
+
+	if subtle.ConstantTimeCompare([]byte(currentUser.PayKey), []byte(req.PayKey)) != 1 {
+		c.JSON(http.StatusBadRequest, util.Err(PayKeyIncorrect))
+		return
+	}
+
+	if currentUser.ID == req.RecipientID && currentUser.Username == req.RecipientUsername {
+		c.JSON(http.StatusBadRequest, util.Err(CannotTransferToSelf))
+		return
+	}
+
+	if err := db.DB(c.Request.Context()).Transaction(
+		func(tx *gorm.DB) error {
+			// 验证收款人是否存在且用户名匹配
+			var recipient model.User
+			if err := tx.Where("id = ? AND username = ?", req.RecipientID, req.RecipientUsername).First(&recipient).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return errors.New(RecipientNotFound)
+				}
+				return err
+			}
+
+			var payer model.User
+			if err := tx.Clauses(clause.Locking{Strength: "UPDATE", Options: "NOWAIT"}).
+				Where("id = ?", currentUser.ID).
+				First(&payer).Error; err != nil {
+				return err
+			}
+
+			if payer.AvailableBalance.LessThan(req.Amount) {
+				return errors.New(InsufficientBalance)
+			}
+
+			// 创建转账订单
+			order := model.Order{
+				OrderName:   "转账",
+				PayerUserID: payer.ID,
+				PayeeUserID: recipient.ID,
+				Amount:      req.Amount,
+				Status:      model.OrderStatusSuccess,
+				Type:        model.OrderTypeTransfer,
+				Remark:      req.Remark,
+				TradeTime:   time.Now(),
+				ExpiresAt:   time.Now().Add(24 * time.Hour),
+			}
+
+			if err := tx.Create(&order).Error; err != nil {
+				return err
+			}
+
+			// 扣减付款人余额
+			if err := tx.Model(&model.User{}).
+				Where("id = ?", payer.ID).
+				UpdateColumns(map[string]interface{}{
+					"available_balance": gorm.Expr("available_balance - ?", req.Amount),
+					"total_transfer":    gorm.Expr("total_transfer + ?", req.Amount),
+				}).Error; err != nil {
+				return err
+			}
+
+			// 增加收款人余额
+			if err := tx.Model(&model.User{}).
+				Where("id = ?", recipient.ID).
+				UpdateColumns(map[string]interface{}{
+					"available_balance": gorm.Expr("available_balance + ?", req.Amount),
+					"total_receive":     gorm.Expr("total_receive + ?", req.Amount),
+				}).Error; err != nil {
+				return err
+			}
+
+			return nil
+		},
+	); err != nil {
+		c.JSON(http.StatusBadRequest, util.Err(err.Error()))
+		return
+	}
 
 	c.JSON(http.StatusOK, util.OKNil())
 }
