@@ -65,6 +65,10 @@ func StartScheduler() error {
 			return
 		}
 
+		if _, err = scheduler.Register(config.Config.Schedule.AutoRefundExpiredDisputesTaskCron, asynq.NewTask(task.AutoRefundExpiredDisputesTask, nil)); err != nil {
+			return
+		}
+
 		// 启动调度器
 		err = scheduler.Run()
 	})

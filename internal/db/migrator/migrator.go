@@ -86,7 +86,7 @@ func initSystemConfigs() {
 		},
 		{
 			Key:         model.ConfigKeyDisputeTimeWindowHours,
-			Value:       "10080",
+			Value:       "168",
 			Description: "商家争议时间窗口（小时）",
 		},
 	}

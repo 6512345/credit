@@ -45,7 +45,7 @@ import (
 func HandleUpdateUserGamificationScores(ctx context.Context, t *asynq.Task) error {
 	// 分页处理用户
 	pageSize := 200
-	page := 0
+	lastID := uint64(0)
 	currentDelay := 0 * time.Second
 
 	// 计算一周前日期
@@ -59,11 +59,10 @@ func HandleUpdateUserGamificationScores(ctx context.Context, t *asynq.Task) erro
 
 	for {
 		var users []model.User
-		if err := db.DB(ctx).
-			Table("users u").
-			Select("u.id, u.username").
-			Joins("INNER JOIN (SELECT id FROM users WHERE last_login_at >= ? ORDER BY last_login_at DESC LIMIT ? OFFSET ?) tmp ON u.id = tmp.id",
-				oneWeekAgo, pageSize, page*pageSize).
+		if err := db.DB(ctx).Where("id > ? AND last_login_at >= ? AND is_active = ?", lastID, oneWeekAgo, true).
+			Select("id, username").
+			Order("id ASC").
+			Limit(pageSize).
 			Find(&users).Error; err != nil {
 			logger.ErrorF(ctx, "查询用户失败: %v", err)
 			return err
@@ -88,7 +87,8 @@ func HandleUpdateUserGamificationScores(ctx context.Context, t *asynq.Task) erro
 				logger.InfoF(ctx, "下发用户[%s]积分计算任务成功", user.Username)
 			}
 		}
-		page++
+
+		lastID = users[len(users)-1].ID
 	}
 	return nil
 }

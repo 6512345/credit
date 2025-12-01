@@ -128,6 +128,8 @@ type logConfig struct {
 type scheduleConfig struct {
 	UserGamificationScoreDispatchIntervalSeconds int    `mapstructure:"user_gamification_score_dispatch_interval_seconds"`
 	UpdateUserGamificationScoresTaskCron         string `mapstructure:"update_user_gamification_scores_task_cron"`
+	DisputeAutoRefundDispatchIntervalSeconds     int    `mapstructure:"dispute_auto_refund_dispatch_interval_seconds"`
+	AutoRefundExpiredDisputesTaskCron            string `mapstructure:"auto_refund_expired_disputes_task_cron"`
 }
 
 // workerConfig 工作配置

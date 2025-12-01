@@ -27,4 +27,6 @@ package task
 const (
 	UpdateUserGamificationScoresTask      = "user:gamification:update_scores_task"
 	UpdateSingleUserGamificationScoreTask = "user:gamification:update_single_score_task"
+	AutoRefundExpiredDisputesTask         = "dispute:auto_refund_expired"
+	AutoRefundSingleDisputeTask           = "dispute:auto_refund_single"
 )
