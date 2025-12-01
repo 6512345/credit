@@ -544,7 +544,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Bearer {ClientID}:{ClientSecret}",
+                        "description": "Basic {ClientID}:{ClientSecret}",
                         "name": "Authorization",
                         "in": "header",
                         "required": true

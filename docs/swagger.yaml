@@ -589,7 +589,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: Bearer {ClientID}:{ClientSecret}
+      - description: Basic {ClientID}:{ClientSecret}
         in: header
         name: Authorization
         required: true

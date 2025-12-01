@@ -95,7 +95,7 @@ type TransferRequest struct {
 // @Tags payment
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "Bearer {ClientID}:{ClientSecret}"
+// @Param Authorization header string true "Basic {ClientID}:{ClientSecret}"
 // @Param request body CreateOrderRequest true "request body"
 // @Success 200 {object} util.ResponseAny
 // @Router /api/v1/merchant/payment/orders [post]
@@ -128,9 +128,9 @@ func CreateMerchantOrder(c *gin.Context) {
 	}
 
 	// 获取商家订单过期时间（分钟）
-	expireMinutes, err := model.GetIntByKey(c.Request.Context(), model.ConfigKeyMerchantOrderExpireMinutes)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, util.Err(err.Error()))
+	expireMinutes, errGet := model.GetIntByKey(c.Request.Context(), model.ConfigKeyMerchantOrderExpireMinutes)
+	if errGet != nil {
+		c.JSON(http.StatusInternalServerError, util.Err(errGet.Error()))
 		return
 	}
 
@@ -201,8 +201,8 @@ func GetMerchantOrder(c *gin.Context) {
 
 	var order model.Order
 	if err := db.DB(c.Request.Context()).
-		Select("orders.*, payer_user.username as payer_username").
-		Joins("LEFT JOIN users as payer_user ON orders.payer_user_id = payer_user.id").
+		Select("orders.*, payee_user.username as payee_username").
+		Joins("LEFT JOIN users as payee_user ON orders.payee_user_id = payee_user.id").
 		Where("orders.id = ? AND orders.status = ?", orderCtx.OrderID, model.OrderStatusPending).
 		First(&order).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
