@@ -63,7 +63,8 @@ type GetOrderRequest struct {
 
 // MerchantInfo 商户信息
 type MerchantInfo struct {
-	AppName string `json:"app_name"`
+	AppName     string `json:"app_name"`
+	RedirectURI string `json:"redirect_uri"`
 }
 
 // GetOrderResponse 查询订单响应
@@ -80,6 +81,24 @@ type TransferRequest struct {
 	Amount            decimal.Decimal `json:"amount" binding:"required"`
 	PayKey            string          `json:"pay_key" binding:"required"`
 	Remark            string          `json:"remark"`
+}
+
+// QueryOrderRequest 商户查询订单请求
+type QueryOrderRequest struct {
+	Act             string `form:"act" json:"act"`
+	ClientID        string `form:"pid" json:"pid" binding:"required"`
+	ClientSecret    string `form:"key" json:"key" binding:"required"`
+	MerchantOrderNo string `form:"out_trade_no" json:"out_trade_no"`
+	TradeNo         uint64 `form:"trade_no" json:"trade_no" binding:"required"`
+}
+
+// RefundOrderRequest 商户退款请求
+type RefundOrderRequest struct {
+	ClientID        string          `form:"pid" json:"pid" binding:"required"`
+	ClientSecret    string          `form:"key" json:"key" binding:"required"`
+	MerchantOrderNo string          `form:"out_trade_no" json:"out_trade_no"`
+	TradeNo         uint64          `form:"trade_no" json:"trade_no" binding:"required"`
+	Amount          decimal.Decimal `form:"money" json:"money" binding:"required"`
 }
 
 // CreateMerchantOrder 商户创建订单接口
@@ -154,14 +173,180 @@ func CreateMerchantOrder(c *gin.Context) {
 	c.Redirect(http.StatusFound, payURL)
 }
 
-// GetMerchantOrder 查询支付订单信息接口
+// QueryMerchantOrderResponse 查询订单响应
+type QueryMerchantOrderResponse struct {
+	Code       int    `json:"code" example:"1"`
+	Msg        string `json:"msg" example:"查询订单号成功！"`
+	TradeNo    string `json:"trade_no" example:"123456"`
+	OutTradeNo string `json:"out_trade_no" example:"M202312080001"`
+	Type       string `json:"type" example:"epay"`
+	Pid        string `json:"pid" example:"1001"`
+	AddTime    string `json:"addtime" example:"2023-12-08 12:00:00"`
+	EndTime    string `json:"endtime" example:"2023-12-08 12:05:00"`
+	Name       string `json:"name" example:"商品名称"`
+	Money      string `json:"money" example:"10.00"`
+	Status     int    `json:"status" example:"1"`
+}
+
+// QueryMerchantOrder 商户主动查询订单状态接口
+// @Tags payment
+// @Accept json
+// @Produce json
+// @Param request query QueryOrderRequest true "查询参数"
+// @Success 200 {object} QueryMerchantOrderResponse
+// @Router /api.php [get]
+func QueryMerchantOrder(c *gin.Context) {
+	var req QueryOrderRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
+		return
+	}
+
+	var apiKey model.MerchantAPIKey
+	if err := db.DB(c.Request.Context()).Where("client_id = ? AND client_secret = ?", req.ClientID, req.ClientSecret).First(&apiKey).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": MerchantInfoNotFound})
+		return
+	}
+
+	var order model.Order
+	if err := db.DB(c.Request.Context()).Where("id = ? AND client_id = ?", req.TradeNo, req.ClientID).First(&order).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"code": -1, "msg": OrderNotFound})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"code": -1, "msg": err.Error()})
+		return
+	}
+
+	statusInt := 0
+	if order.Status == model.OrderStatusSuccess {
+		statusInt = 1
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":         1,
+		"msg":          "查询订单号成功！",
+		"trade_no":     strconv.FormatUint(order.ID, 10),
+		"out_trade_no": order.MerchantOrderNo,
+		"type":         order.PaymentType,
+		"pid":          order.ClientID,
+		"addtime":      order.CreatedAt.Format("2006-01-02 15:04:05"),
+		"endtime":      order.TradeTime.Format("2006-01-02 15:04:05"),
+		"name":         order.OrderName,
+		"money":        order.Amount.Truncate(2).StringFixed(2),
+		"status":       statusInt,
+	})
+}
+
+// RefundMerchantOrderResponse 退款响应
+type RefundMerchantOrderResponse struct {
+	Code int    `json:"code" example:"1"`
+	Msg  string `json:"msg" example:"退款成功"`
+}
+
+// RefundMerchantOrder 商户退款接口
+// @Tags payment
+// @Accept json
+// @Produce json
+// @Param request body RefundOrderRequest true "退款请求"
+// @Success 200 {object} RefundMerchantOrderResponse
+// @Router /api.php [post]
+func RefundMerchantOrder(c *gin.Context) {
+	var req RefundOrderRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
+		return
+	}
+
+	if req.Amount.LessThanOrEqual(decimal.Zero) {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": AmountMustBeGreaterThanZero})
+		return
+	}
+
+	if req.Amount.Exponent() < -2 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": AmountDecimalPlacesExceeded})
+		return
+	}
+
+	var apiKey model.MerchantAPIKey
+	if err := db.DB(c.Request.Context()).Where("client_id = ? AND client_secret = ?", req.ClientID, req.ClientSecret).First(&apiKey).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": MerchantInfoNotFound})
+		return
+	}
+
+	if err := db.DB(c.Request.Context()).Transaction(func(tx *gorm.DB) error {
+		var order model.Order
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("id = ? AND client_id = ? AND status = ? AND amount = ?", req.TradeNo, req.ClientID, model.OrderStatusSuccess, req.Amount).
+			First(&order).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return errors.New(OrderNotFound)
+			}
+			return err
+		}
+
+		var payerUser model.User
+		if err := tx.Where("id = ?", order.PayerUserID).First(&payerUser).Error; err != nil {
+			return err
+		}
+
+		var merchantUser model.User
+		if err := tx.Where("id = ? AND is_active = ?", apiKey.UserID, true).First(&merchantUser).Error; err != nil {
+			return err
+		}
+
+		var merchantPayConfig model.UserPayConfig
+		if err := merchantPayConfig.GetByPayScore(tx, merchantUser.PayScore); err != nil {
+			return err
+		}
+
+		merchantScoreDecrease := order.Amount.Mul(merchantPayConfig.ScoreRate).Round(0).IntPart()
+		if err := tx.Model(&model.User{}).
+			Where("id = ?", merchantUser.ID).
+			UpdateColumns(map[string]interface{}{
+				"available_balance": gorm.Expr("available_balance - ?", order.Amount),
+				"total_receive":     gorm.Expr("total_receive - ?", order.Amount),
+				"pay_score":         gorm.Expr("pay_score - ?", merchantScoreDecrease),
+			}).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Model(&model.User{}).
+			Where("id = ?", payerUser.ID).
+			UpdateColumns(map[string]interface{}{
+				"available_balance": gorm.Expr("available_balance + ?", order.Amount),
+				"total_payment":     gorm.Expr("total_payment - ?", order.Amount),
+				"pay_score":         gorm.Expr("pay_score - ?", order.Amount.Round(0).IntPart()),
+			}).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Model(&model.Order{}).
+			Where("id = ?", order.ID).
+			UpdateColumn("status", model.OrderStatusRefund).Error; err != nil {
+			return err
+		}
+
+		return nil
+	}); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": -1, "msg": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 1,
+		"msg":  "退款成功",
+	})
+}
+
+// GetPaymentPageDetails 查询支付订单信息接口（用于收银台页面）
 // @Tags payment
 // @Accept json
 // @Produce json
 // @Param order_no query string true "订单号"
 // @Success 200 {object} util.ResponseAny
 // @Router /api/v1/merchant/payment/order [get]
-func GetMerchantOrder(c *gin.Context) {
+func GetPaymentPageDetails(c *gin.Context) {
 	var req GetOrderRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, util.Err(err.Error()))
@@ -200,7 +385,8 @@ func GetMerchantOrder(c *gin.Context) {
 		Order:   &order,
 		FeeRate: orderCtx.MerchantPayConfig.FeeRate,
 		Merchant: MerchantInfo{
-			AppName: merchant.AppName,
+			AppName:     merchant.AppName,
+			RedirectURI: merchant.RedirectURI,
 		},
 	}))
 }

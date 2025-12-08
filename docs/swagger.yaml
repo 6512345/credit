@@ -62,13 +62,16 @@ definitions:
       app_name:
         maxLength: 20
         type: string
+      notify_url:
+        maxLength: 100
+        type: string
       redirect_uri:
         maxLength: 100
         type: string
     required:
     - app_homepage_url
     - app_name
-    - redirect_uri
+    - notify_url
     type: object
   merchant.UpdateAPIKeyRequest:
     properties:
@@ -80,6 +83,9 @@ definitions:
         type: string
       app_name:
         maxLength: 20
+        type: string
+      notify_url:
+        maxLength: 100
         type: string
       redirect_uri:
         maxLength: 100
@@ -166,6 +172,69 @@ definitions:
     required:
     - order_no
     - pay_key
+    type: object
+  payment.QueryMerchantOrderResponse:
+    properties:
+      addtime:
+        example: "2023-12-08 12:00:00"
+        type: string
+      code:
+        example: 1
+        type: integer
+      endtime:
+        example: "2023-12-08 12:05:00"
+        type: string
+      money:
+        example: "10.00"
+        type: string
+      msg:
+        example: 查询订单号成功！
+        type: string
+      name:
+        example: 商品名称
+        type: string
+      out_trade_no:
+        example: M202312080001
+        type: string
+      pid:
+        example: "1001"
+        type: string
+      status:
+        example: 1
+        type: integer
+      trade_no:
+        example: "123456"
+        type: string
+      type:
+        example: epay
+        type: string
+    type: object
+  payment.RefundMerchantOrderResponse:
+    properties:
+      code:
+        example: 1
+        type: integer
+      msg:
+        example: 退款成功
+        type: string
+    type: object
+  payment.RefundOrderRequest:
+    properties:
+      key:
+        type: string
+      money:
+        type: number
+      out_trade_no:
+        type: string
+      pid:
+        type: string
+      trade_no:
+        type: integer
+    required:
+    - key
+    - money
+    - pid
+    - trade_no
     type: object
   payment.TransferRequest:
     properties:
@@ -267,6 +336,57 @@ info:
   title: LINUX DO PAY
   version: 0.1.0
 paths:
+  /api.php:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: act
+        type: string
+      - in: query
+        name: key
+        required: true
+        type: string
+      - in: query
+        name: out_trade_no
+        type: string
+      - in: query
+        name: pid
+        required: true
+        type: string
+      - in: query
+        name: trade_no
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payment.QueryMerchantOrderResponse'
+      tags:
+      - payment
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 退款请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/payment.RefundOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payment.RefundMerchantOrderResponse'
+      tags:
+      - payment
   /api/v1/admin/system-configs:
     get:
       produces:
