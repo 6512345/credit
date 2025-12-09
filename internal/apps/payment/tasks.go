@@ -36,6 +36,7 @@ import (
 	"strings"
 
 	"github.com/hibiken/asynq"
+	"github.com/linux-do/pay/internal/common"
 	"github.com/linux-do/pay/internal/db"
 	"github.com/linux-do/pay/internal/logger"
 	"github.com/linux-do/pay/internal/model"
@@ -77,7 +78,7 @@ func HandleMerchantPaymentNotify(ctx context.Context, t *asynq.Task) error {
 		"pid":          payload.ClientID,
 		"trade_no":     strconv.FormatUint(order.ID, 10),
 		"out_trade_no": order.MerchantOrderNo,
-		"type":         util.PayTypeEPay,
+		"type":         common.PayTypeEPay,
 		"name":         order.OrderName,
 		"money":        order.Amount.Truncate(2).StringFixed(2),
 		"trade_status": "TRADE_SUCCESS",

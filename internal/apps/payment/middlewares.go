@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/linux-do/pay/internal/common"
 	"github.com/linux-do/pay/internal/db"
 	"github.com/linux-do/pay/internal/model"
 	"github.com/linux-do/pay/internal/util"
@@ -125,7 +126,7 @@ func RequireSignatureAuth() gin.HandlerFunc {
 		var apiKey model.MerchantAPIKey
 
 		switch PayType {
-		case util.PayTypeEPay:
+		case common.PayTypeEPay:
 			if createOrderReq, err := VerifySignature(c, &apiKey); err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, util.Err(err.Error()))
 				return

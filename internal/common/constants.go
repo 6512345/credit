@@ -22,11 +22,15 @@
  * SOFTWARE.
  */
 
-package util
+package common
 
 const (
 	// PayTypeLDPay Linux Do Pay 支付类型标识
 	PayTypeLDPay = "ldpay"
 	// PayTypeEPay Epay 支付类型
 	PayTypeEPay = "epay"
+)
+
+const (
+	BannedAccount = "账号已被封禁"
 )
