@@ -34,6 +34,7 @@ import (
 	"github.com/linux-do/pay/internal/db"
 	"github.com/linux-do/pay/internal/logger"
 	"github.com/linux-do/pay/internal/model"
+	"github.com/linux-do/pay/internal/service"
 	"github.com/linux-do/pay/internal/util"
 	"github.com/shopspring/decimal"
 )
@@ -113,7 +114,7 @@ type BasicUserInfo struct {
 	PayScore         int64            `json:"pay_score"`
 	IsPayKey         bool             `json:"is_pay_key"`
 	IsAdmin          bool             `json:"is_admin"`
-	RemainQuota      int64            `json:"remain_quota"`
+	RemainQuota      decimal.Decimal  `json:"remain_quota"`
 	PayLevel         model.PayLevel   `json:"pay_level"`
 	DailyLimit       *int64           `json:"daily_limit"`
 }
@@ -132,6 +133,17 @@ func UserInfo(c *gin.Context) {
 		return
 	}
 
+	// 计算剩余额度（-1 表示无限额）
+	remainQuota := decimal.NewFromInt(-1)
+	if payConfig.DailyLimit != nil && *payConfig.DailyLimit > 0 {
+		todayUsed, err := service.GetTodayUsedAmount(db.DB(c.Request.Context()), user.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, util.Err(err.Error()))
+			return
+		}
+		remainQuota = decimal.NewFromInt(*payConfig.DailyLimit).Sub(todayUsed)
+	}
+
 	c.JSON(
 		http.StatusOK,
 		util.OK(BasicUserInfo{
@@ -148,7 +160,7 @@ func UserInfo(c *gin.Context) {
 			PayScore:         user.PayScore,
 			IsPayKey:         user.PayKey != "",
 			IsAdmin:          user.IsAdmin,
-			RemainQuota:      0,
+			RemainQuota:      remainQuota,
 			PayLevel:         payConfig.Level,
 			DailyLimit:       payConfig.DailyLimit,
 		}),

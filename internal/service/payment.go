@@ -113,3 +113,25 @@ func CalculateFee(amount decimal.Decimal, feeRate decimal.Decimal) (fee decimal.
 	feePercent = feeRate.Mul(decimal.NewFromInt(100)).IntPart()
 	return
 }
+
+// GetTodayUsedAmount 获取用户当日已使用的支付额度
+func GetTodayUsedAmount(db *gorm.DB, userID uint64) (decimal.Decimal, error) {
+	now := time.Now()
+	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	todayEnd := todayStart.Add(24 * time.Hour)
+
+	var todayTotalAmount decimal.Decimal
+	if err := db.Model(&model.Order{}).
+		Where("payer_user_id = ? AND status = ? AND type = ? AND trade_time >= ? AND trade_time < ?",
+			userID,
+			model.OrderStatusSuccess,
+			model.OrderTypePayment,
+			todayStart,
+			todayEnd).
+		Select("COALESCE(SUM(amount), 0)").
+		Scan(&todayTotalAmount).Error; err != nil {
+		return decimal.Zero, err
+	}
+
+	return todayTotalAmount, nil
+}
