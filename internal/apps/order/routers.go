@@ -38,7 +38,7 @@ import (
 type TransactionListRequest struct {
 	Page      int        `json:"page" form:"page" binding:"min=1"`
 	PageSize  int        `json:"page_size" form:"page_size" binding:"min=1,max=100"`
-	Type      string     `json:"type" form:"type" binding:"omitempty,oneof=receive payment transfer community"`
+	Type      string     `json:"type" form:"type" binding:"omitempty,oneof=receive payment transfer community online"`
 	Status    string     `json:"status" form:"status" binding:"omitempty,oneof=success pending failed expired disputing refund refused"`
 	ClientID  string     `json:"client_id" form:"client_id" binding:"omitempty"`
 	StartTime *time.Time `json:"startTime" form:"startTime" binding:"omitempty"`
