@@ -512,7 +512,7 @@ function MerchantOnlineContent({ apiKeys, loadAPIKeys }: MerchantOnlineContentPr
 
                   <SheetFooter className="flex flex-row justify-end items-center gap-2">
                     <Button variant="ghost" onClick={() => setIsCreating(false)} className="h-8 text-xs">取消</Button>
-                    <Button onClick={handleCreate} disabled={loading} className="bg-indigo-500 hover:bg-indigo-600 h-8 text-xs">
+                    <Button onClick={handleCreate} disabled={loading} className="bg-primary hover:bg-primary/90 h-8 text-xs">
                       {loading && <Spinner className="mr-1 h-3 w-3" />} 创建
                     </Button>
                   </SheetFooter>

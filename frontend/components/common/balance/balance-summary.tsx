@@ -4,9 +4,9 @@ import { useUser } from "@/contexts/user-context"
 
 /** 颜色配置 - 统一管理主题色 */
 const COLORS = {
-  available: "bg-indigo-500/80",
+  available: "bg-primary/80",
   pending: "bg-zinc-400/80",
-  emptyState: "bg-gray-100 dark:bg-gray-800",
+  emptyState: "bg-muted/50",
 } as const
 
 /**

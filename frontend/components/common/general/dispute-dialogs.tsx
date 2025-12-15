@@ -265,7 +265,7 @@ export function CreateDisputeDialog({ order, onSuccess }: { order: Order; onSucc
             <Button
               onClick={(e) => { e.preventDefault(); handleCreateDispute() }}
               disabled={loading}
-              className="bg-indigo-500 h-8 text-xs"
+              className="bg-primary h-8 text-xs"
             >
               {loading ? <><Spinner /> 提交中</> : '确认发起'}
             </Button>
@@ -341,7 +341,7 @@ export function CancelDisputeDialog({ order, onSuccess }: { order: Order; onSucc
             <Button
               onClick={(e) => { e.preventDefault(); handleCancelDispute() }}
               disabled={loading}
-              className="bg-indigo-500 h-8 text-xs"
+              className="bg-primary h-8 text-xs"
             >
               {loading ? <><Spinner /> 取消中</> : '确认取消'}
             </Button>
@@ -698,7 +698,7 @@ export function RefundReviewDialog({ order, onSuccess }: { order: Order; onSucce
             <Button
               onClick={(e) => { e.preventDefault(); handleSubmit() }}
               disabled={loading || !action}
-              className="bg-indigo-500 h-8 text-xs"
+              className="bg-primary h-8 text-xs"
             >
               {loading ? <><Spinner /> 提交中</> : '确认处理'}
             </Button>

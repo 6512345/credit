@@ -219,7 +219,7 @@ function MethodSelectionStep({
                 exit={{ opacity: 0, height: 0 }}
                 className="pt-3 px-1"
               >
-                <div className="flex items-center gap-2.5 text-xs text-muted-foreground mb-4 bg-muted/30 p-2.5 rounded-lg border">
+                <div className="flex items-center gap-2.5 text-xs text-muted-foreground mb-4 bg-muted/50 p-2.5 rounded-lg border">
                   <div className="p-1 rounded">
                     <Lock className="size-3 text-primary" />
                   </div>

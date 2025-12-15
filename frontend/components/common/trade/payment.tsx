@@ -8,7 +8,7 @@ import * as React from "react"
 export function Payment() {
   return (
     <div className="space-y-4">
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-6 py-4">
+      <div className="bg-muted/50 rounded-lg px-6 py-4">
         <div className="max-w-2xl">
           <h2 className="font-semibold mb-3">付款功能</h2>
           <div className="text-muted-foreground space-y-2">

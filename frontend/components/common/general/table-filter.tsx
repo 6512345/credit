@@ -29,9 +29,9 @@ export const statusConfig: Record<OrderStatus, { label: string; color: string }>
   success: { label: '成功', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
   pending: { label: '处理中', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' },
   failed: { label: '失败', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' },
-  expired: { label: '已过期', color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300' },
+  expired: { label: '已过期', color: 'bg-muted/50 text-gray-800 dark:bg-gray-900 dark:text-gray-300' },
   disputing: { label: '争议中', color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' },
-  refund: { label: '已退款', color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300' },
+  refund: { label: '已退款', color: 'bg-muted/50 text-gray-800 dark:bg-gray-900 dark:text-gray-300' },
   refused: { label: '已拒绝', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' }
 }
 
@@ -243,7 +243,7 @@ function FilterSelect<T extends string>({ label, selectedValues, options, onTogg
           size="sm"
           className={cn(
             "h-5 border-dashed text-[10px] font-medium shadow-none focus-visible:ring-0",
-            selectedValues.length > 0 && "bg-blue-50 border-primary/20"
+            selectedValues.length > 0 && "bg-primary/5 border-primary/20"
           )}
         >
           <Filter className="size-3" />
@@ -342,7 +342,7 @@ function TimeRangeFilter({
           size="sm"
           className={cn(
             "h-5 border-dashed text-[10px] font-medium shadow-none focus-visible:ring-0",
-            (selectedQuickSelection || selectedTimeRange) && "bg-blue-50 border-primary/20"
+            (selectedQuickSelection || selectedTimeRange) && "bg-primary/5 border-primary/20"
           )}
         >
           <CalendarIcon className="mr-1 size-3" />

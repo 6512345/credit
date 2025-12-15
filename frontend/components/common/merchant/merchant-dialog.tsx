@@ -205,7 +205,7 @@ export function MerchantDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button className="bg-indigo-500 hover:bg-indigo-600 text-white h-8 text-xs">
+          <Button className="bg-primary hover:bg-primary/90 h-8 text-xs">
             {mode === 'create' ? '创建应用' : '更新应用'}
           </Button>
         )}
@@ -298,7 +298,7 @@ export function MerchantDialog({
               handleSubmit()
             }}
             disabled={processing}
-            className="bg-indigo-500 hover:bg-indigo-600 h-8 text-xs"
+            className="bg-primary hover:bg-primary/90 h-8 text-xs"
           >
             {processing ? <><Spinner /> {mode === 'create' ? '创建中' : '更新中'}</> : (mode === 'create' ? '创建' : '更新')}
           </Button>

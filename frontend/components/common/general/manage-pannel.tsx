@@ -332,7 +332,7 @@ export function ManageTable<T>({
                 {columns.map((col, index) => (
                   <TableHead
                     key={index}
-                    className={`whitespace-nowrap ${col.width ? `w-[${col.width}]` : ''} ${col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : ''} ${col.className || ''}`}
+                    className={`whitespace-nowrap ${ col.width ? `w-[${ col.width }]` : '' } ${ col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : '' } ${ col.className || '' }`}
                   >
                     {col.header}
                   </TableHead>
@@ -349,11 +349,11 @@ export function ManageTable<T>({
                 return (
                   <TableRow
                     key={id}
-                    className={`border-b border-dashed cursor-pointer transition-colors ${isSelected
-                      ? 'bg-blue-50 hover:bg-blue-100'
+                    className={`border-b border-dashed cursor-pointer transition-colors ${ isSelected
+                      ? 'bg-primary/5 hover:bg-primary/10'
                       : isHovered
-                        ? 'bg-gray-50 hover:bg-gray-100'
-                        : 'hover:bg-gray-50'
+                        ? 'bg-gray-100 hover:bg-muted/50'
+                        : 'hover:bg-gray-100'
                       }`}
                     onMouseEnter={() => onHover(item)}
                     onMouseLeave={() => onHover(null)}
@@ -362,7 +362,7 @@ export function ManageTable<T>({
                     {columns.map((col, index) => (
                       <TableCell
                         key={index}
-                        className={`text-xs py-1 ${col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : ''} ${col.className || ''}`}
+                        className={`text-xs py-1 ${ col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : '' } ${ col.className || '' }`}
                       >
                         {col.cell(item)}
                       </TableCell>

@@ -118,7 +118,7 @@ export function Transfer() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-6 py-8">
+      <div className="bg-muted/50 rounded-lg px-6 py-8">
         <div className="max-w-2xl">
           <h2 className="text-3xl font-bold mb-4 text-foreground">开始转账</h2>
           <p className="text-muted-foreground mb-6 leading-relaxed">
@@ -126,7 +126,7 @@ export function Transfer() {
           </p>
           <Button
             onClick={() => setIsFormOpen(true)}
-            className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium px-6 rounded-md shadow-sm"
+            className="bg-primary hover:bg-primary/90 font-medium px-6 rounded-md shadow-sm"
           >
             开始使用
           </Button>
@@ -217,7 +217,7 @@ export function Transfer() {
                 handleFormSubmit()
               }}
               disabled={!recipientId || !amount || loading}
-              className="bg-indigo-500 hover:bg-indigo-600 h-8 text-xs"
+              className="bg-primary hover:bg-primary/90 h-8 text-xs"
             >
               下一步
             </Button>
@@ -236,7 +236,7 @@ export function Transfer() {
         onConfirm={handleConfirmTransfer}
         loading={loading}
         title="支付密码"
-        description={`正在向 ${recipientUsername} 转账 ${amount} LDC`}
+        description={`正在向 ${ recipientUsername } 转账 ${ amount } LDC`}
       />
     </div>
   )

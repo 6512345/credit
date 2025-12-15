@@ -52,7 +52,7 @@ const DisputeListSkeleton = () => (
     {Array.from({ length: 5 }).map((_, index) => (
       <div
         key={`skeleton-${ index }`}
-        className="flex items-center justify-between py-2 px-3 rounded-md bg-muted/30"
+        className="flex items-center justify-between py-2 px-3 rounded-md bg-muted/50"
       >
         <div className="flex-1 min-w-0">
           <Skeleton className="h-3 w-32 mb-1" />
@@ -74,7 +74,7 @@ const PaymentListSkeleton = () => (
     {Array.from({ length: 5 }).map((_, index) => (
       <div
         key={`payment-skeleton-${ index }`}
-        className="flex items-center justify-between py-2 px-3 rounded-md bg-muted/30"
+        className="flex items-center justify-between py-2 px-3 rounded-md bg-muted/50"
       >
         <div className="flex-1 min-w-0">
           <Skeleton className="h-3 w-32 mb-1" />
@@ -195,7 +195,7 @@ function PaymentCard({ onViewAll }: { onViewAll: () => void }) {
               {payments.map((payment) => (
                 <div
                   key={`payment-${ payment.id }`}
-                  className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/30"
+                  className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/50"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate leading-tight">
@@ -472,7 +472,7 @@ function PendingDisputesCard({ onViewAll }: { onViewAll: () => void }) {
               {disputes.list.map((dispute) => (
                 <div
                   key={`merchant-${ dispute.id }`}
-                  className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/30"
+                  className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/50"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate leading-tight">
@@ -548,7 +548,7 @@ function MyDisputesCard({ onViewAll }: { onViewAll: () => void }) {
               {disputes.list.map((dispute) => (
                 <div
                   key={`user-${ dispute.id }`}
-                  className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/30"
+                  className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/50"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate leading-tight">

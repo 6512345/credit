@@ -85,7 +85,7 @@ export function PasswordDialog({
 
           <Button
             type="button"
-            className="w-full bg-indigo-500 hover:bg-indigo-600 h-8 text-xs"
+            className="w-full bg-primary hover:bg-primary/90 h-8 text-xs"
             onClick={handleConfirm}
             disabled={password.length !== 6 || loading}
           >

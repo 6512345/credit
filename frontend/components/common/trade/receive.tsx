@@ -40,13 +40,13 @@ function FeatureCard({ title, description, linkText, href }: { title: string, de
 export function Receive() {
   return (
     <div className="space-y-4">
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-6 py-8">
+      <div className="bg-muted/50 rounded-lg px-6 py-8">
         <div className="max-w-2xl">
           <h2 className="text-3xl font-bold mb-4 text-foreground">开始收款</h2>
           <p className="text-muted-foreground mb-6 leading-relaxed">
             通过无代码选项快速开始使用或探索与我们的 API 集成的可自定义账户界面。
           </p>
-          <Button className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium px-6 rounded-md shadow-sm">
+          <Button className="bg-primary hover:bg-primary/90 font-medium px-6 rounded-md shadow-sm">
             开始使用
           </Button>
         </div>
