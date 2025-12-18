@@ -1,13 +1,13 @@
-# LINUX DO PAY Config
+# LINUX DO Credit Config
 # Copy to config.yaml for runtime
 
 # App
 app:
-  app_name: "linux-do-pay"
+  app_name: "linux-do-credit"
   env: "development" # development, testing, production
   addr: ":8000"
   graceful_shutdown_timeout: 30
-  session_cookie_name: "linux_do_pay_session_id" # change this in local dev env
+  session_cookie_name: "linux_do_credit_session_id" # change this in local dev env
   session_secret: "<uniq string>" # you can't change this after first time start
   session_domain: ".linux.do"
   session_age: 86400
@@ -32,7 +32,7 @@ database:
   port: 5432
   username: "postgres"
   password: ""
-  database: "linux_do_pay"
+  database: "linux_do_credit"
   max_idle_conn: 16
   max_open_conn: 128
   conn_max_lifetime: 1800
@@ -59,7 +59,7 @@ redis:
   db: 0                    # Cluster 模式忽略此项
   cluster_mode: false      # true 启用 Cluster 模式
   master_name: ""          # 非空启用 Sentinel 模式
-  key_prefix: "pay:"
+  key_prefix: "credit:"
   pool_size: 100
   min_idle_conn: 10
   dial_timeout: 5
