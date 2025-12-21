@@ -19,11 +19,12 @@ package model
 import (
 	"time"
 
+	"github.com/linux-do/credit/internal/db/idgen"
 	"gorm.io/gorm"
 )
 
 type MerchantAPIKey struct {
-	ID             uint64         `json:"id" gorm:"primaryKey;autoIncrement"`
+	ID             uint64         `json:"id" gorm:"primaryKey"`
 	UserID         uint64         `json:"user_id" gorm:"not null;index:idx_merchant_api_keys_user_created,priority:1"`
 	ClientID       string         `json:"client_id" gorm:"size:64;uniqueIndex;index:idx_client_credentials,priority:2;not null"`
 	ClientSecret   string         `json:"client_secret" gorm:"size:64;index:idx_client_credentials,priority:1;not null"`
@@ -45,4 +46,11 @@ func (m *MerchantAPIKey) GetByID(tx *gorm.DB, id uint64) error {
 // GetByClientID 通过 ClientID 查询商户 API Key
 func (m *MerchantAPIKey) GetByClientID(tx *gorm.DB, clientID string) error {
 	return tx.Where("client_id = ?", clientID).First(m).Error
+}
+
+func (m *MerchantAPIKey) BeforeCreate(*gorm.DB) error {
+	if m.ID == 0 {
+		m.ID = idgen.NextUint64ID()
+	}
+	return nil
 }

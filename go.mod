@@ -3,6 +3,8 @@ module github.com/linux-do/credit
 go 1.25.5
 
 require (
+	github.com/ClickHouse/clickhouse-go/v2 v2.37.2
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/gin-contrib/sessions v1.0.4
 	github.com/gin-gonic/gin v1.11.0
 	github.com/google/uuid v1.6.0
@@ -33,7 +35,6 @@ require (
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/ClickHouse/ch-go v0.66.1 // indirect
-	github.com/ClickHouse/clickhouse-go/v2 v2.37.2 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/boj/redistore v1.4.1 // indirect

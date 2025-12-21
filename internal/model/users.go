@@ -31,7 +31,7 @@ import (
 	"github.com/linux-do/credit/internal/db"
 	"github.com/linux-do/credit/internal/logger"
 	"github.com/linux-do/credit/internal/task"
-	"github.com/linux-do/credit/internal/task/schedule"
+    "github.com/linux-do/credit/internal/task/scheduler"
 	"github.com/linux-do/credit/internal/util"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -144,15 +144,25 @@ func (u *User) CheckActive() error {
 }
 
 // EnqueueBadgeScoreTask 为用户下发积分计算任务
-func (u *User) EnqueueBadgeScoreTask(ctx context.Context) {
+func (u *User) EnqueueBadgeScoreTask(ctx context.Context, delay time.Duration) error {
 	payload, _ := json.Marshal(map[string]interface{}{
 		"user_id": u.ID,
 	})
-	if _, err := schedule.AsynqClient.Enqueue(asynq.NewTask(task.UpdateSingleUserGamificationScoreTask, payload), asynq.Queue(task.QueueWhitelistOnly)); err != nil {
-		logger.ErrorF(ctx, "下发用户[%s]积分计算任务失败: %v", u.Username, err)
-	} else {
-		logger.InfoF(ctx, "下发用户[%s]积分计算任务成功", u.Username)
+
+	opts := []asynq.Option{
+		asynq.Queue(task.QueueWhitelistOnly),
+		asynq.MaxRetry(5),
 	}
+	if delay > 0 {
+		opts = append(opts, asynq.ProcessIn(delay))
+	}
+
+	if _, err := scheduler.AsynqClient.Enqueue(asynq.NewTask(task.UpdateSingleUserGamificationScoreTask, payload), opts...); err != nil {
+		logger.ErrorF(ctx, "下发用户[%s]积分计算任务失败: %v", u.Username, err)
+		return err
+	}
+	logger.InfoF(ctx, "下发用户[%s]积分计算任务成功", u.Username)
+	return nil
 }
 
 // MarkAsDeactivatedAndCreateNew 将当前用户标记为已注销,并创建新用户

@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/linux-do/credit/internal/db"
+	"github.com/linux-do/credit/internal/db/idgen"
 	"github.com/linux-do/credit/internal/logger"
 	"github.com/shopspring/decimal"
 
@@ -51,7 +52,7 @@ const (
 )
 
 type Order struct {
-	ID              uint64          `json:"id" gorm:"primaryKey;autoIncrement"`
+	ID              uint64          `json:"id" gorm:"primaryKey"`
 	OrderNo         string          `json:"order_no" gorm:"-"`
 	OrderName       string          `json:"order_name" gorm:"size:64;not null"`
 	MerchantOrderNo string          `json:"merchant_order_no" gorm:"size:64;index"`
@@ -68,7 +69,14 @@ type Order struct {
 	TradeTime       time.Time       `json:"trade_time" gorm:"index:idx_orders_payer_status_type_trade,priority:4"`
 	ExpiresAt       time.Time       `json:"expires_at" gorm:"not null"`
 	CreatedAt       time.Time       `json:"created_at" gorm:"autoCreateTime;index:idx_orders_payee_status_type_created,priority:4;index:idx_orders_payer_status_type_created,priority:4;index:idx_orders_client_status_created,priority:3"`
-	UpdatedAt       time.Time       `json:"updated_at" gorm:"autoUpdateTime"`
+	UpdatedAt       time.Time       `json:"updated_at" gorm:"autoUpdateTime;index"`
+}
+
+func (o *Order) BeforeCreate(*gorm.DB) error {
+	if o.ID == 0 {
+		o.ID = idgen.NextUint64ID()
+	}
+	return nil
 }
 
 // AfterFind 格式化 OrderNo

@@ -17,15 +17,16 @@ limitations under the License.
 package config
 
 type configModel struct {
-	App      appConfig      `mapstructure:"app"`
-	OAuth2   OAuth2Config   `mapstructure:"oauth2"`
-	Database databaseConfig `mapstructure:"database"`
-	Redis    redisConfig    `mapstructure:"redis"`
-	Log      logConfig      `mapstructure:"log"`
-	Schedule scheduleConfig `mapstructure:"schedule"`
-	Worker   workerConfig   `mapstructure:"worker"`
-	LinuxDo  linuxDoConfig  `mapstructure:"linuxdo"`
-	Otel     otelConfig     `mapstructure:"otel"`
+	App        appConfig        `mapstructure:"app"`
+	OAuth2     OAuth2Config     `mapstructure:"oauth2"`
+	Database   databaseConfig   `mapstructure:"database"`
+	Redis      redisConfig      `mapstructure:"redis"`
+	Log        logConfig        `mapstructure:"log"`
+	Scheduler  schedulerConfig  `mapstructure:"scheduler"`
+	Worker     workerConfig     `mapstructure:"worker"`
+	ClickHouse clickHouseConfig `mapstructure:"clickhouse"`
+	LinuxDo    linuxDoConfig    `mapstructure:"linuxdo"`
+	Otel       otelConfig       `mapstructure:"otel"`
 }
 
 // appConfig 应用基本配置
@@ -33,6 +34,7 @@ type appConfig struct {
 	AppName                 string `mapstructure:"app_name"`
 	Env                     string `mapstructure:"env"`
 	Addr                    string `mapstructure:"addr"`
+	NodeID                  int64  `mapstructure:"node_id"`
 	APIPrefix               string `mapstructure:"api_prefix"`
 	GracefulShutdownTimeout int    `mapstructure:"graceful_shutdown_timeout"`
 	FrontendPayURL          string `mapstructure:"frontend_pay_url"`
@@ -85,6 +87,20 @@ type databaseReplicaConfig struct {
 	Password string `mapstructure:"password"`
 }
 
+// clickhouse 配置
+type clickHouseConfig struct {
+	Enabled         bool     `mapstructure:"enabled"`
+	Hosts           []string `mapstructure:"hosts"`
+	Username        string   `mapstructure:"username"`
+	Password        string   `mapstructure:"password"`
+	Database        string   `mapstructure:"database"`
+	MaxIdleConn     int      `mapstructure:"max_idle_conn"`
+	MaxOpenConn     int      `mapstructure:"max_open_conn"`
+	ConnMaxLifetime int      `mapstructure:"conn_max_lifetime"`
+	DialTimeout     int      `mapstructure:"dial_timeout"`
+	BlockBufferSize uint8    `mapstructure:"block_buffer_size"`
+}
+
 // redisConfig Redis配置
 type redisConfig struct {
 	Enabled         bool     `mapstructure:"enabled"`
@@ -117,12 +133,13 @@ type logConfig struct {
 	Compress   bool   `mapstructure:"compress"`
 }
 
-// scheduleConfig 定时任务配置
-type scheduleConfig struct {
+// schedulerConfig 定时任务配置
+type schedulerConfig struct {
 	UserGamificationScoreDispatchIntervalSeconds int    `mapstructure:"user_gamification_score_dispatch_interval_seconds"`
 	UpdateUserGamificationScoresTaskCron         string `mapstructure:"update_user_gamification_scores_task_cron"`
 	DisputeAutoRefundDispatchIntervalSeconds     int    `mapstructure:"dispute_auto_refund_dispatch_interval_seconds"`
 	AutoRefundExpiredDisputesTaskCron            string `mapstructure:"auto_refund_expired_disputes_task_cron"`
+	SyncOrdersToClickHouseTaskCron               string `mapstructure:"sync_orders_to_clickhouse_task_cron"`
 }
 
 // workerConfig 工作配置

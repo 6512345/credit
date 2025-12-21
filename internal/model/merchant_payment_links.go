@@ -19,12 +19,13 @@ package model
 import (
 	"time"
 
+	"github.com/linux-do/credit/internal/db/idgen"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
 type MerchantPaymentLink struct {
-	ID               uint64          `json:"id" gorm:"primaryKey;autoIncrement"`
+	ID               uint64          `json:"id" gorm:"primaryKey"`
 	MerchantAPIKeyID uint64          `json:"merchant_api_key_id" gorm:"not null;index"`
 	Token            string          `json:"token" gorm:"size:64;uniqueIndex;not null"`
 	Amount           decimal.Decimal `json:"amount" gorm:"type:numeric(20,2);not null"`
@@ -37,4 +38,11 @@ type MerchantPaymentLink struct {
 // GetByToken 通过 Token 查询支付链接
 func (m *MerchantPaymentLink) GetByToken(tx *gorm.DB, token string) error {
 	return tx.Where("token = ?", token).First(m).Error
+}
+
+func (m *MerchantPaymentLink) BeforeCreate(*gorm.DB) error {
+	if m.ID == 0 {
+		m.ID = idgen.NextUint64ID()
+	}
+	return nil
 }
