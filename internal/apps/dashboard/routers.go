@@ -123,6 +123,7 @@ func GetTopCustomers(c *gin.Context) {
 		Joins("LEFT JOIN users ON orders.payer_user_id = users.id").
 		Where("orders.payee_user_id = ?", user.ID).
 		Where("orders.status = ?", model.OrderStatusSuccess).
+		Where("orders.type in ?", []model.OrderType{model.OrderTypePayment, model.OrderTypeOnline}).
 		Where("orders.created_at >= ? AND orders.created_at < ?", startDate, endDate).
 		Group("orders.payer_user_id, users.username").
 		Order("total_amount DESC").

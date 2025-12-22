@@ -131,26 +131,12 @@ func UpdateAPIKey(c *gin.Context) {
 
 	apiKey, _ := util.GetFromContext[*model.MerchantAPIKey](c, merchant.APIKeyObjKey)
 
-	updates := make(map[string]interface{})
-	if req.AppName != "" {
-		updates["app_name"] = req.AppName
-	}
-	if req.AppHomepageURL != "" {
-		updates["app_homepage_url"] = req.AppHomepageURL
-	}
-	if req.AppDescription != "" {
-		updates["app_description"] = req.AppDescription
-	}
-	if req.RedirectURI != "" {
-		updates["redirect_uri"] = req.RedirectURI
-	}
-	if req.NotifyURL != "" {
-		updates["notify_url"] = req.NotifyURL
-	}
-
-	if len(updates) == 0 {
-		c.JSON(http.StatusBadRequest, util.Err(NoFieldsToUpdate))
-		return
+	updates := map[string]interface{}{
+		"app_name":         req.AppName,
+		"app_homepage_url": req.AppHomepageURL,
+		"app_description":  req.AppDescription,
+		"redirect_uri":     req.RedirectURI,
+		"notify_url":       req.NotifyURL,
 	}
 
 	if err := db.DB(c.Request.Context()).
