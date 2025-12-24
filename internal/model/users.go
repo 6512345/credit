@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -49,11 +50,24 @@ const (
 
 type OAuthUserInfo struct {
 	Id         uint64     `json:"id"`
+	Sub        string     `json:"sub"`
 	Username   string     `json:"username"`
 	Name       string     `json:"name"`
 	Active     bool       `json:"active"`
 	AvatarUrl  string     `json:"avatar_url"`
 	TrustLevel TrustLevel `json:"trust_level"`
+}
+
+// FillIdFromSub 从 OIDC sub claim 填充 Id 字段
+func (o *OAuthUserInfo) FillIdFromSub() error {
+	if o.Id == 0 && o.Sub != "" {
+		id, err := strconv.ParseUint(o.Sub, 10, 64)
+		if err != nil {
+			return err
+		}
+		o.Id = id
+	}
+	return nil
 }
 
 // UserGamificationScoreResponse API响应

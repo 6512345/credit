@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"strconv"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -48,43 +47,6 @@ func GetUserIDFromContext(c *gin.Context) uint64 {
 	return GetUserIDFromSession(session)
 }
 
-// OIDCClaims OIDC ID Token 中的 Claims
-type OIDCClaims struct {
-	Sub        string `json:"sub"`
-	Username   string `json:"username"`
-	Login      string `json:"login"`
-	Name       string `json:"name"`
-	Email      string `json:"email"`
-	AvatarURL  string `json:"avatar_url"`
-	Active     bool   `json:"active"`
-	TrustLevel int    `json:"trust_level"`
-	Silenced   bool   `json:"silenced"`
-}
-
-// ToOAuthUserInfo 将 OIDC Claims 转换为 OAuthUserInfo
-func (c *OIDCClaims) ToOAuthUserInfo() (*model.OAuthUserInfo, error) {
-	// 解析 sub 为 uint64
-	id, err := strconv.ParseUint(c.Sub, 10, 64)
-	if err != nil {
-		return nil, errors.New("invalid sub claim: " + c.Sub)
-	}
-
-	// 使用 username，如果为空则使用 login
-	username := c.Username
-	if username == "" {
-		username = c.Login
-	}
-
-	return &model.OAuthUserInfo{
-		Id:         id,
-		Username:   username,
-		Name:       c.Name,
-		Active:     c.Active,
-		AvatarUrl:  c.AvatarURL,
-		TrustLevel: model.TrustLevel(c.TrustLevel),
-	}, nil
-}
-
 func doOAuth(ctx context.Context, code string) (*model.User, error) {
 	// init trace
 	ctx, span := otel_trace.Start(ctx, "OAuth")
@@ -105,16 +67,15 @@ func doOAuth(ctx context.Context, code string) (*model.User, error) {
 		if err != nil {
 			logger.WarnF(ctx, "Failed to verify ID token, falling back to UserEndpoint: %v", err)
 		} else {
-			var claims OIDCClaims
+			var claims model.OAuthUserInfo
 			if err := idToken.Claims(&claims); err != nil {
 				logger.WarnF(ctx, "Failed to parse ID token claims, falling back to UserEndpoint: %v", err)
 			} else {
-				// 转换为 OAuthUserInfo
-				userInfo, err = claims.ToOAuthUserInfo()
-				if err != nil {
-					logger.WarnF(ctx, "Failed to convert OIDC claims, falling back to UserEndpoint: %v", err)
-					userInfo = nil
+				// 从 sub 填充 ID
+				if err := claims.FillIdFromSub(); err != nil {
+					logger.WarnF(ctx, "Failed to parse sub claim, falling back to UserEndpoint: %v", err)
 				} else {
+					userInfo = &claims
 					logger.InfoF(ctx, "Successfully authenticated user via OIDC: %s (ID: %d)", userInfo.Username, userInfo.Id)
 				}
 			}

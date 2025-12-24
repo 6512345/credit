@@ -18,83 +18,52 @@ package oauth
 
 import (
 	"context"
-	"sync"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/linux-do/credit/internal/config"
-	"github.com/linux-do/credit/internal/logger"
 	"golang.org/x/oauth2"
 )
 
 var (
 	oauthConf    *oauth2.Config
-	oidcProvider *oidc.Provider
 	oidcVerifier *oidc.IDTokenVerifier
-	initOnce     sync.Once
-	initErr      error
 )
 
-// InitOIDC 初始化 OIDC Provider 和 Verifier
-func InitOIDC(ctx context.Context) error {
-	initOnce.Do(func() {
-		issuer := config.Config.OAuth2.Issuer
-		if issuer == "" {
-			issuer = "https://connect.linux.do/"
-		}
+func init() {
+	ctx := context.Background()
+	issuer := config.Config.OAuth2.Issuer
+	if issuer == "" {
+		issuer = "https://connect.linux.do/"
+	}
 
-		// 创建 OIDC Provider
-		oidcProvider, initErr = oidc.NewProvider(ctx, issuer)
-		if initErr != nil {
-			logger.ErrorF(ctx, "Failed to create OIDC provider: %v", initErr)
-			return
-		}
-
-		// 创建 ID Token 验证器
-		oidcVerifier = oidcProvider.Verifier(&oidc.Config{
-			ClientID: config.Config.OAuth2.ClientID,
-		})
-
-		// 使用 OIDC Provider 的端点配置 OAuth2
+	// 创建 OIDC Provider
+	oidcProvider, err := oidc.NewProvider(ctx, issuer)
+	if err != nil {
+		// OIDC 初始化失败，使用 OAuth2 配置
 		oauthConf = &oauth2.Config{
 			ClientID:     config.Config.OAuth2.ClientID,
 			ClientSecret: config.Config.OAuth2.ClientSecret,
 			RedirectURL:  config.Config.OAuth2.RedirectURI,
 			Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
-			Endpoint:     oidcProvider.Endpoint(),
+			Endpoint: oauth2.Endpoint{
+				AuthURL:   config.Config.OAuth2.AuthorizationEndpoint,
+				TokenURL:  config.Config.OAuth2.TokenEndpoint,
+				AuthStyle: oauth2.AuthStyleAutoDetect,
+			},
 		}
+		return
+	}
 
-		logger.InfoF(ctx, "OIDC provider initialized successfully with issuer: %s", issuer)
+	// OIDC 初始化成功
+	oidcVerifier = oidcProvider.Verifier(&oidc.Config{
+		ClientID: config.Config.OAuth2.ClientID,
 	})
 
-	return initErr
-}
-
-// GetOIDCVerifier 获取 OIDC ID Token 验证器
-func GetOIDCVerifier() *oidc.IDTokenVerifier {
-	return oidcVerifier
-}
-
-// GetOIDCProvider 获取 OIDC Provider
-func GetOIDCProvider() *oidc.Provider {
-	return oidcProvider
-}
-
-// GetOAuthConfig 获取 OAuth2 配置
-func GetOAuthConfig() *oauth2.Config {
-	return oauthConf
-}
-
-// InitOAuthFallback 初始化 OAuth2 (不使用 OIDC，作为回退方案)
-func InitOAuthFallback() {
 	oauthConf = &oauth2.Config{
 		ClientID:     config.Config.OAuth2.ClientID,
 		ClientSecret: config.Config.OAuth2.ClientSecret,
 		RedirectURL:  config.Config.OAuth2.RedirectURI,
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
-		Endpoint: oauth2.Endpoint{
-			AuthURL:   config.Config.OAuth2.AuthorizationEndpoint,
-			TokenURL:  config.Config.OAuth2.TokenEndpoint,
-			AuthStyle: oauth2.AuthStyleAutoDetect,
-		},
+		Endpoint:     oidcProvider.Endpoint(),
 	}
 }
