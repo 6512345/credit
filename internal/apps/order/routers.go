@@ -88,9 +88,9 @@ func ListTransactions(c *gin.Context) {
 			// community 类型：查询当前用户作为收款方的 community 订单
 			baseQuery = baseQuery.Where("orders.type = ? AND orders.payee_user_id = ?", orderType, user.ID)
 		case model.OrderTypeOnline:
+			// online 类型：商家可查看自己 client_id 的所有订单，普通用户只能查看与自己相关的订单
 			if req.ClientID != "" {
 				clientIDHandled = true
-				// 验证 client_id 是否属于当前用户
 				var count int64
 				if err := db.DB(c.Request.Context()).Model(&model.MerchantAPIKey{}).
 					Where("client_id = ? AND user_id = ?", req.ClientID, user.ID).
