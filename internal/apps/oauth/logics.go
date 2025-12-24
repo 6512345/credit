@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/gin-contrib/sessions"
@@ -27,7 +28,6 @@ import (
 	"github.com/linux-do/credit/internal/common"
 	"github.com/linux-do/credit/internal/config"
 	"github.com/linux-do/credit/internal/db"
-	"github.com/linux-do/credit/internal/logger"
 	"github.com/linux-do/credit/internal/model"
 	"github.com/linux-do/credit/internal/otel_trace"
 	"go.opentelemetry.io/otel/codes"
@@ -47,65 +47,59 @@ func GetUserIDFromContext(c *gin.Context) uint64 {
 	return GetUserIDFromSession(session)
 }
 
-func doOAuth(ctx context.Context, code string) (*model.User, error) {
-	// init trace
+// doOAuth 执行 OAuth2/OIDC 认证流程
+func doOAuth(ctx context.Context, code string, nonce string) (*model.User, error) {
 	ctx, span := otel_trace.Start(ctx, "OAuth")
 	defer span.End()
 
-	// get token
+	// 使用授权码换取 Token
 	token, err := oauthConf.Exchange(ctx, code)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 
-	var userInfo *model.OAuthUserInfo
+	var userInfo model.OAuthUserInfo
 
-	// 先尝试用 OIDC ID Token
-	if rawIDToken, ok := token.Extra("id_token").(string); ok && oidcVerifier != nil {
-		idToken, err := oidcVerifier.Verify(ctx, rawIDToken)
-		if err != nil {
-			logger.WarnF(ctx, "Failed to verify ID token, falling back to UserEndpoint: %v", err)
-		} else {
-			var claims model.OAuthUserInfo
-			if err := idToken.Claims(&claims); err != nil {
-				logger.WarnF(ctx, "Failed to parse ID token claims, falling back to UserEndpoint: %v", err)
-			} else {
-				// 从 sub 填充 ID
-				if err := claims.FillIdFromSub(); err != nil {
-					logger.WarnF(ctx, "Failed to parse sub claim, falling back to UserEndpoint: %v", err)
-				} else {
-					userInfo = &claims
-					logger.InfoF(ctx, "Successfully authenticated user via OIDC: %s (ID: %d)", userInfo.Username, userInfo.Id)
-				}
+	if oidcVerifier != nil {
+		if rawIDToken, ok := token.Extra("id_token").(string); ok {
+			idToken, verifyErr := oidcVerifier.Verify(ctx, rawIDToken)
+			if verifyErr != nil {
+				err := fmt.Errorf("%s: %w", IDTokenVerifyFailed, verifyErr)
+				span.SetStatus(codes.Error, err.Error())
+				return nil, err
+			}
+			if nonce != "" && idToken.Nonce != nonce {
+				span.SetStatus(codes.Error, NonceMismatch)
+				return nil, errors.New(NonceMismatch)
+			}
+			if claimsErr := idToken.Claims(&userInfo); claimsErr != nil {
+				span.SetStatus(codes.Error, claimsErr.Error())
+				return nil, claimsErr
 			}
 		}
 	}
 
-	// 如果 OIDC 不行，回退到 UserEndpoint 方式
-	if userInfo == nil {
-		logger.InfoF(ctx, "Using UserEndpoint fallback for authentication")
+	if userInfo.GetID() == 0 {
 		client := oauthConf.Client(ctx, token)
-		resp, err := client.Get(config.Config.OAuth2.UserEndpoint)
-		if err != nil {
-			span.SetStatus(codes.Error, err.Error())
-			return nil, err
+		resp, httpErr := client.Get(config.Config.OAuth2.UserEndpoint)
+		if httpErr != nil {
+			span.SetStatus(codes.Error, httpErr.Error())
+			return nil, httpErr
 		}
-		defer func(body io.ReadCloser) { _ = resp.Body.Close() }(resp.Body)
+		defer resp.Body.Close()
 
-		// load user info
-		responseData, err := io.ReadAll(resp.Body)
-		if err != nil {
-			span.SetStatus(codes.Error, err.Error())
-			return nil, err
+		responseData, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			span.SetStatus(codes.Error, readErr.Error())
+			return nil, readErr
 		}
-		var fallbackUserInfo model.OAuthUserInfo
-		if err = json.Unmarshal(responseData, &fallbackUserInfo); err != nil {
-			span.SetStatus(codes.Error, err.Error())
-			return nil, err
+		if unmarshalErr := json.Unmarshal(responseData, &userInfo); unmarshalErr != nil {
+			span.SetStatus(codes.Error, unmarshalErr.Error())
+			return nil, unmarshalErr
 		}
-		userInfo = &fallbackUserInfo
 	}
+
 	if !userInfo.Active {
 		err = errors.New(common.BannedAccount)
 		span.SetStatus(codes.Error, err.Error())
@@ -117,14 +111,14 @@ func doOAuth(ctx context.Context, code string) (*model.User, error) {
 
 	txByUsername := db.DB(ctx).Where("username = ?", userInfo.Username).First(&user)
 	if txByUsername.Error != nil {
-		txByID := user.GetByID(db.DB(ctx), userInfo.Id)
+		txByID := user.GetByID(db.DB(ctx), userInfo.GetID())
 		if txByID == nil {
 			// ID 存在但 username 不匹配(用户改名)
 			if err = user.CheckActive(); err != nil {
 				span.SetStatus(codes.Error, err.Error())
 				return nil, err
 			}
-			user.UpdateFromOAuthInfo(userInfo)
+			user.UpdateFromOAuthInfo(&userInfo)
 			if err = db.DB(ctx).Save(&user).Error; err != nil {
 				span.SetStatus(codes.Error, err.Error())
 				return nil, err
@@ -132,7 +126,7 @@ func doOAuth(ctx context.Context, code string) (*model.User, error) {
 		} else if errors.Is(txByUsername.Error, gorm.ErrRecordNotFound) {
 			// ID 和 username 都不存在(全新用户)
 			user = model.User{}
-			if err = user.CreateWithInitialCredit(ctx, userInfo); err != nil {
+			if err = user.CreateWithInitialCredit(ctx, &userInfo); err != nil {
 				span.SetStatus(codes.Error, err.Error())
 				return nil, err
 			}
@@ -142,9 +136,9 @@ func doOAuth(ctx context.Context, code string) (*model.User, error) {
 			return nil, txByUsername.Error
 		}
 	} else {
-		if user.ID != userInfo.Id {
+		if user.ID != userInfo.GetID() {
 			// username 相同但 ID 不同(账户注销后被新用户占用)
-			if err = user.CreateWithInitialCredit(ctx, userInfo); err != nil {
+			if err = user.CreateWithInitialCredit(ctx, &userInfo); err != nil {
 				span.SetStatus(codes.Error, err.Error())
 				return nil, err
 			}
@@ -153,7 +147,7 @@ func doOAuth(ctx context.Context, code string) (*model.User, error) {
 				span.SetStatus(codes.Error, err.Error())
 				return nil, err
 			}
-			user.UpdateFromOAuthInfo(userInfo)
+			user.UpdateFromOAuthInfo(&userInfo)
 			if err = db.DB(ctx).Save(&user).Error; err != nil {
 				span.SetStatus(codes.Error, err.Error())
 				return nil, err

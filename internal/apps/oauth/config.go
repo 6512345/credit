@@ -18,6 +18,7 @@ package oauth
 
 import (
 	"context"
+	"log"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/linux-do/credit/internal/config"
@@ -30,40 +31,37 @@ var (
 )
 
 func init() {
-	ctx := context.Background()
-	issuer := config.Config.OAuth2.Issuer
-	if issuer == "" {
-		issuer = "https://connect.linux.do/"
-	}
+	cfg := config.Config.OAuth2
 
-	// 创建 OIDC Provider
-	oidcProvider, err := oidc.NewProvider(ctx, issuer)
-	if err != nil {
-		// OIDC 初始化失败，使用 OAuth2 配置
-		oauthConf = &oauth2.Config{
-			ClientID:     config.Config.OAuth2.ClientID,
-			ClientSecret: config.Config.OAuth2.ClientSecret,
-			RedirectURL:  config.Config.OAuth2.RedirectURI,
-			Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
-			Endpoint: oauth2.Endpoint{
-				AuthURL:   config.Config.OAuth2.AuthorizationEndpoint,
-				TokenURL:  config.Config.OAuth2.TokenEndpoint,
-				AuthStyle: oauth2.AuthStyleAutoDetect,
-			},
+	if cfg.Issuer != "" {
+		ctx := context.Background()
+		provider, err := oidc.NewProvider(ctx, cfg.Issuer)
+		if err != nil {
+			log.Printf("[OAuth] 初始化 OIDC Provider 失败: %v，将仅使用 OAuth2", err)
+		} else {
+			oidcVerifier = provider.Verifier(&oidc.Config{
+				ClientID: cfg.ClientID,
+			})
+			log.Printf("[OAuth] OIDC Provider 初始化成功: %s", cfg.Issuer)
 		}
-		return
 	}
 
-	// OIDC 初始化成功
-	oidcVerifier = oidcProvider.Verifier(&oidc.Config{
-		ClientID: config.Config.OAuth2.ClientID,
-	})
+	// 初始化 OAuth2 配置
+	scopes := []string{"profile", "email"}
+	if oidcVerifier != nil {
+		// 启用 OIDC 时添加 openid scope
+		scopes = append([]string{oidc.ScopeOpenID}, scopes...)
+	}
 
 	oauthConf = &oauth2.Config{
-		ClientID:     config.Config.OAuth2.ClientID,
-		ClientSecret: config.Config.OAuth2.ClientSecret,
-		RedirectURL:  config.Config.OAuth2.RedirectURI,
-		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
-		Endpoint:     oidcProvider.Endpoint(),
+		ClientID:     cfg.ClientID,
+		ClientSecret: cfg.ClientSecret,
+		RedirectURL:  cfg.RedirectURI,
+		Scopes:       scopes,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:   cfg.AuthorizationEndpoint,
+			TokenURL:  cfg.TokenEndpoint,
+			AuthStyle: oauth2.AuthStyleAutoDetect,
+		},
 	}
 }
