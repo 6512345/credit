@@ -146,8 +146,8 @@ export function TransactionProvider({ children, defaultParams = {} }: Transactio
       }
 
       setTotal(result.total)
-      setCurrentPage(result.page)
-      setPageSize(result.page_size)
+      setCurrentPage(queryParams.page)
+      setPageSize(queryParams.page_size)
       setLastParams(prev => ({ ...prev, ...params }))
     } catch (err) {
       if (err instanceof Error && err.message === '请求已被取消') {
@@ -172,6 +172,7 @@ export function TransactionProvider({ children, defaultParams = {} }: Transactio
     if (loading) return
 
     const nextPage = currentPage + 1
+    console.log('[TransactionContext] loadMore: nextPage =', nextPage)
     await fetchTransactions({
       ...lastParams,
       page: nextPage,

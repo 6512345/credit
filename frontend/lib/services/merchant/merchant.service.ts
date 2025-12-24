@@ -13,6 +13,7 @@ import type {
   QueryMerchantOrderResponse,
   RefundMerchantOrderRequest,
   RefundMerchantOrderResponse,
+  GetPaymentLinkInfoResponse,
 } from './types';
 
 /**
@@ -197,12 +198,12 @@ export class MerchantService extends BaseService {
    * @example
    * ```typescript
    * const linkInfo = await MerchantService.getPaymentLinkByToken('abc123');
-   * console.log('商品名称:', linkInfo.product_name);
-   * console.log('金额:', linkInfo.amount);
+   * console.log('商品名称:', linkInfo.payment_link.product_name);
+   * console.log('金额:', linkInfo.payment_link.amount);
    * ```
    */
-  static async getPaymentLinkByToken(token: string): Promise<PaymentLink> {
-    return this.get<PaymentLink>(`/payment-links/${ token }`);
+  static async getPaymentLinkByToken(token: string): Promise<GetPaymentLinkInfoResponse> {
+    return this.get<GetPaymentLinkInfoResponse>(`/payment-links/${ token }`);
   }
 
   /**

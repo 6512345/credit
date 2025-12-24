@@ -144,6 +144,7 @@ export type {
   QueryMerchantOrderResponse,
   RefundMerchantOrderRequest,
   RefundMerchantOrderResponse,
+  GetPaymentLinkInfoResponse,
 } from './merchant';
 
 // 管理员服务

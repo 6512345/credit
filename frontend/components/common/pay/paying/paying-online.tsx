@@ -95,43 +95,35 @@ export function PayingOnline() {
     setLoading(true)
     try {
       const data = await services.merchant.getPaymentLinkByToken(targetToken)
-      setPaymentLink(data)
+      setPaymentLink(data.payment_link)
 
       /* 将支付链接信息转换为订单信息格式，以复用PayingInfo和PayingNow组件 */
       const mockOrderInfo: GetMerchantOrderResponse = {
         merchant: {
-          app_name: data.app_name || "商户", // 使用支付链接的应用名称
-          redirect_uri: "",
+          app_name: data.merchant.app_name || "商户",
+          redirect_uri: data.merchant.redirect_uri || "",
         },
         order: {
           id: 0,
-          order_no: `LINK-${ data.id }`,
-          order_name: data.product_name,
+          order_no: `LINK-${ data.payment_link.id }`,
+          order_name: data.payment_link.product_name,
           payer_username: user?.username || "",
           payee_username: "",
-          amount: data.amount,
+          amount: data.payment_link.amount,
           status: "pending",
           type: "payment",
           payment_type: "link",
-          remark: data.remark || "",
+          remark: data.payment_link.remark || "",
           client_id: "",
           return_url: "",
           notify_url: "",
           trade_time: null,
-          created_at: data.created_at,
-          updated_at: data.updated_at,
+          created_at: data.payment_link.created_at,
+          updated_at: data.payment_link.updated_at,
         },
-        user_pay_config: {
-          id: 0,
-          level: 1,
-          min_score: 0,
-          max_score: null,
-          daily_limit: null,
-          fee_rate: "0.00",
-          created_at: "",
-          updated_at: "",
-        },
+        user_pay_config: data.user_pay_config,
       }
+
       setOrderInfo(mockOrderInfo)
       setError(false)
     } catch (error: unknown) {
@@ -179,10 +171,17 @@ export function PayingOnline() {
         })
       }
 
-      /* 5秒后刷新页面 */
+      /* 5秒后跳转到首页或回调地址 */
       timeoutRef.current = setTimeout(() => {
         if (!isMountedRef.current) return
-        window.location.reload()
+
+        const redirectUri = orderInfo?.merchant?.redirect_uri
+        if (redirectUri && redirectUri.trim()) {
+          window.location.href = redirectUri
+          return
+        }
+
+        window.location.href = '/home'
       }, 5000)
     } catch (error: unknown) {
       handleServiceError(error, "认证")

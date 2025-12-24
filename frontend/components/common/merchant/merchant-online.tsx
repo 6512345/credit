@@ -15,7 +15,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFo
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { useMerchant } from "@/contexts/merchant-context"
 import { TransactionProvider, useTransaction } from "@/contexts/transaction-context"
-import { MerchantService, type PaymentLink, type GetMerchantOrderResponse, type MerchantAPIKey } from "@/lib/services"
+import { useUser } from "@/contexts/user-context"
+import { MerchantService, ConfigService, type PaymentLink, type GetMerchantOrderResponse, type MerchantAPIKey, type UserPayConfig } from "@/lib/services"
 import { PayingInfo } from "@/components/common/pay/paying/paying-info"
 import { PayingNow } from "@/components/common/pay/paying/paying-now"
 import { MerchantSelector } from "@/components/common/merchant/merchant-selector"
@@ -260,7 +261,25 @@ function MerchantOnlineContent({ apiKeys }: MerchantOnlineContentProps) {
     toast.success("在线积分流转服务链接已复制")
   }
 
+  /* 获取用户支付配置 */
+  const [userPayConfigs, setUserPayConfigs] = useState<UserPayConfig[]>([])
+  const { user } = useUser()
+
+  useEffect(() => {
+    const loadConfigs = async () => {
+      try {
+        const configs = await ConfigService.getUserPayConfigs()
+        setUserPayConfigs(configs)
+      } catch (error) {
+        console.error("Failed to load user pay configs:", error)
+      }
+    }
+    loadConfigs()
+  }, [])
+
   /* 预览订单信息 */
+  const currentUserConfig = userPayConfigs.find(c => user?.pay_level !== undefined && c.level === user.pay_level)
+
   const previewOrderInfo: GetMerchantOrderResponse = {
     merchant: {
       app_name: selectedKey?.app_name || "服务名称",
@@ -284,9 +303,12 @@ function MerchantOnlineContent({ apiKeys }: MerchantOnlineContentProps) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
-    user_pay_config: {
+    user_pay_config: currentUserConfig ? {
+      ...currentUserConfig,
+      fee_rate: String(currentUserConfig.fee_rate)
+    } : {
       id: 0,
-      level: 1,
+      level: user?.pay_level ?? 0,
       min_score: 0,
       max_score: null,
       daily_limit: null,
@@ -416,12 +438,12 @@ function MerchantOnlineContent({ apiKeys }: MerchantOnlineContentProps) {
               </div>
             </div>
 
-            <div className={`space-y-4 ${ isFullscreen ? 'fixed inset-0 z-10 bg-background p-6' : '' }`}>
+            <div className={`space-y-4 ${ isFullscreen ? 'fixed inset-0 z-50 bg-background/95 backdrop-blur-sm p-6 flex flex-col' : '' }`}>
               <div className="flex items-center justify-between shrink-0">
                 <h2 className="font-semibold">{isFullscreen ? '全屏预览' : '实时预览'}</h2>
               </div>
-              <div className={`border-none overflow-hidden relative h-[600px] ${ isFullscreen ? 'border-0 rounded-none h-full' : '' }`}>
-                <div className="absolute z-15 left-1/2 -translate-x-1/2">
+              <div className={`border-none overflow-hidden relative h-[600px] ${ isFullscreen ? 'border-0 rounded-none h-full flex-1' : '' }`}>
+                <div className="absolute z-15 left-1/2 -translate-x-1/2 top-4">
                   <div className="h-8 bg-background border border-border rounded-full p-1.5 flex items-center gap-0.5 shadow-lg">
                     <Button variant={previewDevice === 'mobile' ? 'secondary' : 'ghost'} size="icon" className="size-6 rounded-full" onClick={() => setPreviewDevice('mobile')}>
                       <Smartphone className="size-3.5" />
@@ -456,7 +478,9 @@ function MerchantOnlineContent({ apiKeys }: MerchantOnlineContentProps) {
                       height: DEVICE_CONFIG[previewDevice].height,
                       borderRadius: DEVICE_CONFIG[previewDevice].borderRadius,
                       borderWidth: DEVICE_CONFIG[previewDevice].borderWidth,
-                      scale: DEVICE_CONFIG[previewDevice].scale,
+                      scale: isFullscreen
+                        ? (previewDevice === 'mobile' ? 0.9 : previewDevice === 'tablet' ? 0.75 : 0.65)
+                        : DEVICE_CONFIG[previewDevice].scale,
                     }}
                     transition={{ type: "spring", stiffness: 200, damping: 25 }}
                     className="shrink-0 overflow-hidden shadow-2xl bg-black relative border-[#1f1f1f] origin-center rounded-[50px]"

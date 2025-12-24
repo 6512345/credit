@@ -63,8 +63,15 @@ function getTimeRange() {
  */
 export function BalanceTable() {
   const [activeTab, setActiveTab] = React.useState<OrderType | "all">("all")
+  const [timeRange, setTimeRange] = React.useState<{ startTime: string; endTime: string } | null>(null)
 
-  const timeRange = getTimeRange()
+  React.useEffect(() => {
+    setTimeRange(getTimeRange())
+  }, [])
+
+  if (!timeRange) {
+    return null // or a loading skeleton
+  }
 
   return (
     <div>
