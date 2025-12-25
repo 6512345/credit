@@ -17,6 +17,8 @@ limitations under the License.
 package worker
 
 import (
+	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/hibiken/asynq"
@@ -37,6 +39,29 @@ func StartWorker() error {
 			ShutdownTimeout: 3 * time.Minute,
 			Queues:          buildQueuesFromConfig(),
 			StrictPriority:  config.Config.Worker.StrictPriority,
+			RetryDelayFunc: func(n int, err error, t *asynq.Task) time.Duration {
+				// 针对积分更新任务使用更长的重试间隔 + 随机抖动
+				if t.Type() == task.UpdateSingleUserGamificationScoreTask {
+					var baseDelay time.Duration
+					if err != nil && strings.Contains(err.Error(), "429") {
+						baseDelay = 120 * time.Second
+					} else {
+						baseDelay = 60 * time.Second
+					}
+					// 指数退避
+					delay := baseDelay * time.Duration(1<<uint(n-1))
+					if delay > 30*time.Minute {
+						delay = 30 * time.Minute
+					}
+					// delay ~ 2*delay
+					if delay > 0 {
+						jitter := time.Duration(rand.Int63n(int64(delay)))
+						delay += jitter
+					}
+					return delay
+				}
+				return asynq.DefaultRetryDelayFunc(n, err, t)
+			},
 		},
 	)
 
