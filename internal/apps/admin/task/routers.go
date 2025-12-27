@@ -105,7 +105,7 @@ func DispatchTask(c *gin.Context) {
 		taskID = fmt.Sprintf("manual_%s", req.TaskType)
 	}
 
-	info, err := scheduler.AsynqClient.Enqueue(
+	_, err := scheduler.AsynqClient.Enqueue(
 		taskInfo,
 		asynq.TaskID(taskID),
 		asynq.MaxRetry(meta.MaxRetry),
@@ -116,5 +116,5 @@ func DispatchTask(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, util.OK(info.Queue))
+	c.JSON(http.StatusOK, util.OKNil())
 }
