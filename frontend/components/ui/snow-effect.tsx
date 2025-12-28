@@ -30,7 +30,7 @@ export function SnowEffect() {
     }
 
     const createSnowflakes = () => {
-      const count = Math.floor(window.innerWidth / 4) // Adjust density
+      const count = Math.floor(window.innerWidth / 4)
       snowflakes = []
       for (let i = 0; i < count; i++) {
         snowflakes.push({
@@ -54,11 +54,9 @@ export function SnowEffect() {
         ctx.fillStyle = `rgba(255, 255, 255, ${ flake.opacity })`
         ctx.fill()
 
-        // Update position
         flake.y += flake.speed
         flake.x += flake.drift
 
-        // Reset if out of bounds
         if (flake.y > canvas.height) {
           flake.y = -flake.radius
           flake.x = Math.random() * canvas.width
@@ -73,7 +71,6 @@ export function SnowEffect() {
       animationFrameId = requestAnimationFrame(drawSnowflakes)
     }
 
-    // Initialize
     resizeCanvas()
     createSnowflakes()
     drawSnowflakes()

@@ -326,5 +326,34 @@ export const howToUseSections: PolicySection[] = [
         </ul>
       </div>
     )
+  },
+  {
+    value: "scripts",
+    title: "10. 辅助脚本",
+    content: (
+      <div className="space-y-4 text-sm leading-relaxed">
+        <p>为了方便用户随时查看当前的实时积分收入，我们提供了开源的 Userscript 脚本。</p>
+        <ul className="list-disc pl-4 md:pl-5 space-y-2">
+          <li><strong>功能：</strong>在 LINUX DO 显示实时积分收入，支持拖拽，不影响界面。</li>
+          <li><strong>获取：</strong>仅需安装 Tampermonkey 插件即可使用。</li>
+          <li><strong>安装：</strong>
+            <a
+              href="https://linux.do/t/topic/1365853"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline inline-flex items-center gap-1"
+            >
+              「LINUX DO Credit」实时积分收入脚本
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link"><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></svg>
+            </a>
+          </li>
+        </ul>
+        <div className="bg-muted/50 border border-border/50 rounded-lg px-3 py-2 mt-2">
+          <p className="text-xs text-muted-foreground m-0">
+            注：脚本完全开源且安全，仅通过官方 API 获取公开数据，不涉及任何敏感权限。
+          </p>
+        </div>
+      </div>
+    )
   }
 ]

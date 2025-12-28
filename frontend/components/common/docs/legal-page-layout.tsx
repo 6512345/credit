@@ -74,7 +74,7 @@ export function LegalPageLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background relative selection:bg-primary/20 overflow-x-hidden">
+    <div className="min-h-screen bg-background relative selection:bg-primary/20">
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-primary origin-left z-50"
         style={{ scaleX }}
@@ -127,51 +127,53 @@ export function LegalPageLayout({
 
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 relative">
           <aside className="hidden lg:block lg:col-span-3">
-            <div className="sticky top-24 space-y-2 max-h-[calc(100vh-8rem)] overflow-y-auto pr-4 scrollbar-thin">
-              <div className="text-sm font-semibold text-foreground mb-4 pl-3">目录</div>
-              <nav className="space-y-1">
-                {sections.map((section) => (
-                  <div key={section.value} className="space-y-1">
-                    <a
-                      href={`#${ section.value }`}
-                      onClick={(e) => scrollToSection(e, section.value)}
-                      className={cn(
-                        "group flex items-center justify-between py-2 px-3 text-sm rounded-lg transition-all duration-200",
-                        activeSection === section.value
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            <div className="sticky top-24">
+              <div className="space-y-2 max-h-[calc(100vh-8rem)] overflow-y-auto pr-4 scrollbar-thin">
+                <div className="text-sm font-semibold text-foreground mb-4 pl-3">目录</div>
+                <nav className="space-y-1">
+                  {sections.map((section) => (
+                    <div key={section.value} className="space-y-1">
+                      <a
+                        href={`#${ section.value }`}
+                        onClick={(e) => scrollToSection(e, section.value)}
+                        className={cn(
+                          "group flex items-center justify-between py-2 px-3 text-sm rounded-lg transition-all duration-200",
+                          activeSection === section.value
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        )}
+                      >
+                        <span className="truncate">{section.title}</span>
+                        {activeSection === section.value && (
+                          <motion.div
+                            layoutId="active-dot"
+                            className="w-1.5 h-1.5 rounded-full bg-primary"
+                          />
+                        )}
+                      </a>
+                      {section.children && (
+                        <div className="pl-4 space-y-1">
+                          {section.children.map((child) => (
+                            <a
+                              key={child.value}
+                              href={`#${ child.value }`}
+                              onClick={(e) => scrollToSection(e, child.value)}
+                              className={cn(
+                                "block py-1.5 px-3 text-xs rounded-lg transition-all duration-200 truncate",
+                                activeSection === child.value
+                                  ? "text-primary font-medium bg-primary/5"
+                                  : "text-muted-foreground/80 hover:text-foreground hover:bg-muted/30"
+                              )}
+                            >
+                              {child.title}
+                            </a>
+                          ))}
+                        </div>
                       )}
-                    >
-                      <span className="truncate">{section.title}</span>
-                      {activeSection === section.value && (
-                        <motion.div
-                          layoutId="active-dot"
-                          className="w-1.5 h-1.5 rounded-full bg-primary"
-                        />
-                      )}
-                    </a>
-                    {section.children && (
-                      <div className="pl-4 space-y-1">
-                        {section.children.map((child) => (
-                          <a
-                            key={child.value}
-                            href={`#${ child.value }`}
-                            onClick={(e) => scrollToSection(e, child.value)}
-                            className={cn(
-                              "block py-1.5 px-3 text-xs rounded-lg transition-all duration-200 truncate",
-                              activeSection === child.value
-                                ? "text-primary font-medium bg-primary/5"
-                                : "text-muted-foreground/80 hover:text-foreground hover:bg-muted/30"
-                            )}
-                          >
-                            {child.title}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </nav>
+                    </div>
+                  ))}
+                </nav>
+              </div>
             </div>
           </aside>
 
@@ -228,7 +230,7 @@ export function LegalPageLayout({
             </div>
           </main>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }
