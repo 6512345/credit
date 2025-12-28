@@ -95,20 +95,6 @@ definitions:
     - dispute_id
     - status
     type: object
-  link.CreatePaymentLinkRequest:
-    properties:
-      amount:
-        type: number
-      product_name:
-        maxLength: 30
-        type: string
-      remark:
-        maxLength: 100
-        type: string
-    required:
-    - amount
-    - product_name
-    type: object
   link.PayByLinkRequest:
     properties:
       pay_key:
@@ -122,6 +108,26 @@ definitions:
     required:
     - pay_key
     - token
+    type: object
+  link.PaymentLinkRequest:
+    properties:
+      amount:
+        type: number
+      product_name:
+        maxLength: 30
+        type: string
+      remark:
+        maxLength: 100
+        type: string
+      total_limit:
+        minimum: 1
+        type: integer
+      user_limit:
+        minimum: 1
+        type: integer
+    required:
+    - amount
+    - product_name
     type: object
   model.PayLevel:
     enum:
@@ -893,7 +899,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/link.CreatePaymentLinkRequest'
+          $ref: '#/definitions/link.PaymentLinkRequest'
       produces:
       - application/json
       responses:
@@ -918,6 +924,37 @@ paths:
         name: linkId
         required: true
         type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/util.ResponseAny'
+      tags:
+      - merchant
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: API Key ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Payment Link ID
+        format: int64
+        in: path
+        name: linkId
+        required: true
+        type: integer
+      - description: 更新支付链接请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/link.PaymentLinkRequest'
       produces:
       - application/json
       responses:

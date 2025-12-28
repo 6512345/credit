@@ -20,6 +20,8 @@ const (
 	BannedAccount               = "账号已被封禁"
 	AmountMustBeGreaterThanZero = "金额必须大于0"
 	AmountDecimalPlacesExceeded = "金额小数位数不能超过2位"
+	RateMustBeBetweenZeroAndOne = "比率必须在 0 到 1 之间"
+	RateDecimalPlacesExceeded   = "比率小数位数不能超过2位"
 	InsufficientBalance         = "余额不足"
 	DailyLimitExceeded          = "已超过每日限额"
 	PayKeyIncorrect             = "支付密钥错误"

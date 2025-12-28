@@ -17,5 +17,7 @@ limitations under the License.
 package link
 
 const (
-	PaymentLinkNotFound = "支付链接不存在"
+	PaymentLinkNotFound           = "支付链接不存在"
+	PaymentLinkTotalLimitExceeded = "该支付链接已达到付款次数上限"
+	PaymentLinkUserLimitExceeded  = "您已达到该链接的付款次数限制"
 )

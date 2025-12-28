@@ -794,7 +794,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/link.CreatePaymentLinkRequest"
+                            "$ref": "#/definitions/link.PaymentLinkRequest"
                         }
                     }
                 ],
@@ -809,6 +809,52 @@ const docTemplate = `{
             }
         },
         "/api/v1/merchant/api-keys/{id}/payment-links/{linkId}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "merchant"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "API Key ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Payment Link ID",
+                        "name": "linkId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新支付链接请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/link.PaymentLinkRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/util.ResponseAny"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "produces": [
                     "application/json"
@@ -1471,26 +1517,6 @@ const docTemplate = `{
                 }
             }
         },
-        "link.CreatePaymentLinkRequest": {
-            "type": "object",
-            "required": [
-                "amount",
-                "product_name"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "product_name": {
-                    "type": "string",
-                    "maxLength": 30
-                },
-                "remark": {
-                    "type": "string",
-                    "maxLength": 100
-                }
-            }
-        },
         "link.PayByLinkRequest": {
             "type": "object",
             "required": [
@@ -1508,6 +1534,34 @@ const docTemplate = `{
                 },
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "link.PaymentLinkRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "product_name"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "product_name": {
+                    "type": "string",
+                    "maxLength": 30
+                },
+                "remark": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "total_limit": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "user_limit": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },

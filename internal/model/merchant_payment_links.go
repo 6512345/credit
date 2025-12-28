@@ -31,7 +31,10 @@ type MerchantPaymentLink struct {
 	Amount           decimal.Decimal `json:"amount" gorm:"type:numeric(20,2);not null"`
 	ProductName      string          `json:"product_name" gorm:"size:30;not null"`
 	Remark           string          `json:"remark" gorm:"size:100"`
+	TotalLimit       *uint           `json:"total_limit" gorm:"default:null"`
+	UserLimit        *uint           `json:"user_limit" gorm:"default:null"`
 	CreatedAt        time.Time       `json:"created_at" gorm:"autoCreateTime;index"`
+	UpdatedAt        time.Time       `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt        gorm.DeletedAt  `json:"deleted_at" gorm:"index"`
 }
 

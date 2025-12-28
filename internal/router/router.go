@@ -186,6 +186,7 @@ func Serve() {
 					{
 						linkRouter.GET("", link.ListPaymentLinks)
 						linkRouter.POST("", link.CreatePaymentLink)
+						linkRouter.PUT("/:linkId", link.UpdatePaymentLink)
 						linkRouter.DELETE("/:linkId", link.DeletePaymentLink)
 					}
 				}

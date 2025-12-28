@@ -19,6 +19,7 @@ package util
 import (
 	"errors"
 
+	"github.com/linux-do/credit/internal/common"
 	"github.com/shopspring/decimal"
 )
 
@@ -27,14 +28,25 @@ func ValidateRates(rates ...decimal.Decimal) error {
 	for _, rate := range rates {
 		// 验证范围：必须在 [0, 1] 之间
 		if rate.LessThan(decimal.Zero) || rate.GreaterThan(decimal.NewFromInt(1)) {
-			return errors.New("必须在 0 到 1 之间")
+			return errors.New(common.RateMustBeBetweenZeroAndOne)
 		}
 
 		// 验证小数位数：不超过2位
 		if rate.Exponent() < -2 {
-			return errors.New("小数位数不能超过2位")
+			return errors.New(common.RateDecimalPlacesExceeded)
 		}
 	}
 
+	return nil
+}
+
+// ValidateAmount 验证金额：必须大于0，且小数位数不超过2位
+func ValidateAmount(amount decimal.Decimal) error {
+	if amount.LessThanOrEqual(decimal.Zero) {
+		return errors.New(common.AmountMustBeGreaterThanZero)
+	}
+	if amount.Exponent() < -2 {
+		return errors.New(common.AmountDecimalPlacesExceeded)
+	}
 	return nil
 }

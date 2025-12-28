@@ -35,7 +35,6 @@ import (
 	"github.com/linux-do/credit/internal/service"
 	"github.com/linux-do/credit/internal/util"
 	"github.com/redis/go-redis/v9"
-	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
@@ -194,14 +193,9 @@ func VerifySignature(c *gin.Context, apiKey *model.MerchantAPIKey) (*CreateOrder
 		return nil, err
 	}
 
-	// 验证金额必须大于0
-	if req.Amount.LessThanOrEqual(decimal.Zero) {
-		return nil, errors.New(common.AmountMustBeGreaterThanZero)
-	}
-
-	// 验证小数位数不超过2位
-	if req.Amount.Exponent() < -2 {
-		return nil, errors.New(common.AmountDecimalPlacesExceeded)
+	// 验证金额
+	if err := util.ValidateAmount(req.Amount); err != nil {
+		return nil, err
 	}
 
 	if err := apiKey.GetByClientID(db.DB(c.Request.Context()), req.ClientID); err != nil {

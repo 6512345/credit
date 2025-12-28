@@ -247,13 +247,8 @@ func RefundMerchantOrder(c *gin.Context) {
 		return
 	}
 
-	if req.Amount.LessThanOrEqual(decimal.Zero) {
-		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": common.AmountMustBeGreaterThanZero})
-		return
-	}
-
-	if req.Amount.Exponent() < -2 {
-		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": common.AmountDecimalPlacesExceeded})
+	if err := util.ValidateAmount(req.Amount); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
 		return
 	}
 
@@ -502,13 +497,8 @@ func Transfer(c *gin.Context) {
 		return
 	}
 
-	if req.Amount.LessThanOrEqual(decimal.Zero) {
-		c.JSON(http.StatusBadRequest, util.Err(common.AmountMustBeGreaterThanZero))
-		return
-	}
-
-	if req.Amount.Exponent() < -2 {
-		c.JSON(http.StatusBadRequest, util.Err(common.AmountDecimalPlacesExceeded))
+	if err := util.ValidateAmount(req.Amount); err != nil {
+		c.JSON(http.StatusBadRequest, util.Err(err.Error()))
 		return
 	}
 
