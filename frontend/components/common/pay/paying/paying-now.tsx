@@ -351,7 +351,7 @@ function Footer({ loading }: { loading?: boolean }) {
     </div>
   ) : (
     <div className="flex items-center justify-center gap-2 text-[10px] uppercase font-bold text-muted-foreground/40 mt-10">
-      <ShieldCheck className="size-3" color="#0db561" />
+      <ShieldCheck className="size-3 text-green-500" />
       <span>由 LINUX DO Credit 提供安全认证</span>
     </div>
   )
