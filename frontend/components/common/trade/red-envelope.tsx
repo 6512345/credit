@@ -80,7 +80,7 @@ export function RedEnvelope() {
         setReceivedEnvelopes(prev => page === 1 ? result.red_envelopes : [...prev, ...result.red_envelopes])
         setReceivedTotal(result.total)
       }
-    } catch (error) {
+    } catch {
       toast.error('加载红包列表失败')
     } finally {
       setListLoading(false)
@@ -100,7 +100,7 @@ export function RedEnvelope() {
     } else if (activeTab === 'received' && receivedEnvelopes.length === 0) {
       loadEnvelopes('received', 1)
     }
-  }, [activeTab])
+  }, [activeTab, sentEnvelopes.length, receivedEnvelopes.length])
 
   /* 验证金额格式 */
   const validateAmount = (value: string): boolean => {

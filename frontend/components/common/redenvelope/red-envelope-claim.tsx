@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { toast } from "sonner"
 import { Gift } from "lucide-react"
@@ -23,11 +23,7 @@ export function RedEnvelopeClaimPage({ code }: RedEnvelopeClaimProps) {
   const [claimedAmount, setClaimedAmount] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadDetail()
-  }, [code])
-
-  const loadDetail = async () => {
+  const loadDetail = useCallback(async () => {
     try {
       const data = await services.redEnvelope.getDetail(code)
       console.log('Red envelope data:', data.red_envelope)
@@ -44,7 +40,11 @@ export function RedEnvelopeClaimPage({ code }: RedEnvelopeClaimProps) {
       setError(err instanceof Error ? err.message : "加载失败")
       setState("error")
     }
-  }
+  }, [code])
+
+  useEffect(() => {
+    loadDetail()
+  }, [loadDetail])
 
   const handleOpen = async () => {
     setState("opening")
@@ -233,7 +233,7 @@ export function RedEnvelopeClaimPage({ code }: RedEnvelopeClaimProps) {
                   transition={{ delay: 0.5 }}
                   className="text-muted-foreground text-sm mt-8"
                 >
-                  点击 "開" 字领取红包
+                  点击 &ldquo;開&rdquo; 字领取红包
                 </motion.p>
               )}
             </motion.div>
