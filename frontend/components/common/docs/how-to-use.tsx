@@ -281,7 +281,7 @@ export const howToUseSections: PolicySection[] = [
           <li><strong>基本获取方式：</strong>通过在 LINUX DO 社区的活跃行为获得：
             <ul className="list-[circle] pl-4 md:pl-5 mt-1 text-muted-foreground">
               <li>点赞、阅读、解决问题等社区贡献</li>
-              <li>详情可见 <a href="https://linux.do/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">LINUX DO 社区</a></li>
+              <li>详情可见 <a href="https://linux.do/t/topic/1355933" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">LINUX DO 社区</a></li>
             </ul>
           </li>
           <li><strong>划转规则：</strong>
@@ -305,7 +305,6 @@ export const howToUseSections: PolicySection[] = [
         <ul className="list-disc pl-4 md:pl-5 space-y-1">
           <li><strong>个人资料：</strong>查看当前的账户信息和会员等级</li>
           <li><strong>安全设置：</strong>修改认证密码</li>
-          <li><strong>通知设置：</strong>暂未上线</li>
           <li><strong>外观设置：</strong>切换页面主题、界面外观</li>
         </ul>
       </div>
