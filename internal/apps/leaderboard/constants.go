@@ -17,6 +17,5 @@ limitations under the License.
 package leaderboard
 
 const (
-	cacheKeyPrefix  = "leaderboard:v1:"
-	defaultPageSize = 50
+	cacheKeyPrefix = "user:leaderboard:"
 )

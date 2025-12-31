@@ -29,17 +29,13 @@ import (
 )
 
 func getList(ctx context.Context, req *ListRequest) (*ListResponse, error) {
-	if req.Page <= 0 {
-		req.Page = 1
-	}
-	if req.PageSize <= 0 {
-		req.PageSize = defaultPageSize
-	}
-
-	// 1. 检查 Redis 缓存
+	// 检查 Redis 缓存
 	cacheKey := fmt.Sprintf("%slist:p:%d:s:%d", cacheKeyPrefix, req.Page, req.PageSize)
-	if cached, err := getFromCache(ctx, cacheKey); err == nil && cached != nil {
-		return cached, nil
+	if data, err := db.Redis.Get(ctx, db.PrefixedKey(cacheKey)).Bytes(); err == nil {
+		var cached ListResponse
+		if err := json.Unmarshal(data, &cached); err == nil {
+			return &cached, nil
+		}
 	}
 
 	// 2. 查询数据库
@@ -57,15 +53,20 @@ func getList(ctx context.Context, req *ListRequest) (*ListResponse, error) {
 		Items:    items,
 	}
 
-	_ = setToCache(ctx, cacheKey, response, getCacheTTL())
+	if data, err := json.Marshal(response); err == nil {
+		_ = db.Redis.Set(ctx, db.PrefixedKey(cacheKey), data, getCacheTTL()).Err()
+	}
 	return response, nil
 }
 
 func getUserRank(ctx context.Context, userID uint64) (*UserRankResponse, error) {
 	// 检查缓存
 	cacheKey := fmt.Sprintf("%suser:%d", cacheKeyPrefix, userID)
-	if cached, err := getUserFromCache(ctx, cacheKey); err == nil && cached != nil {
-		return cached, nil
+	if data, err := db.Redis.Get(ctx, db.PrefixedKey(cacheKey)).Bytes(); err == nil {
+		var cached UserRankResponse
+		if err := json.Unmarshal(data, &cached); err == nil {
+			return &cached, nil
+		}
 	}
 
 	// 查询用户余额
@@ -90,7 +91,9 @@ func getUserRank(ctx context.Context, userID uint64) (*UserRankResponse, error) 
 		},
 	}
 
-	_ = setUserToCache(ctx, cacheKey, response, getCacheTTL())
+	if data, err := json.Marshal(response); err == nil {
+		_ = db.Redis.Set(ctx, db.PrefixedKey(cacheKey), data, getCacheTTL()).Err()
+	}
 	return response, nil
 }
 
@@ -109,7 +112,7 @@ func getMetadata() *MetadataResponse {
 		Defaults: struct {
 			PageSize int `json:"page_size"`
 		}{
-			PageSize: defaultPageSize,
+			PageSize: 50,
 		},
 	}
 }
@@ -155,66 +158,4 @@ func queryLeaderboard(ctx context.Context, req *ListRequest) ([]LeaderboardEntry
 	}
 
 	return items, total, nil
-}
-
-func getFromCache(ctx context.Context, key string) (*ListResponse, error) {
-	if db.Redis == nil {
-		return nil, fmt.Errorf("redis not available")
-	}
-
-	data, err := db.Redis.Get(ctx, db.PrefixedKey(key)).Bytes()
-	if err != nil {
-		return nil, err
-	}
-
-	var response ListResponse
-	if err := json.Unmarshal(data, &response); err != nil {
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func setToCache(ctx context.Context, key string, response *ListResponse, ttl time.Duration) error {
-	if db.Redis == nil {
-		return fmt.Errorf("redis not available")
-	}
-
-	data, err := json.Marshal(response)
-	if err != nil {
-		return err
-	}
-
-	return db.Redis.Set(ctx, db.PrefixedKey(key), data, ttl).Err()
-}
-
-func getUserFromCache(ctx context.Context, key string) (*UserRankResponse, error) {
-	if db.Redis == nil {
-		return nil, fmt.Errorf("redis not available")
-	}
-
-	data, err := db.Redis.Get(ctx, db.PrefixedKey(key)).Bytes()
-	if err != nil {
-		return nil, err
-	}
-
-	var response UserRankResponse
-	if err := json.Unmarshal(data, &response); err != nil {
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func setUserToCache(ctx context.Context, key string, response *UserRankResponse, ttl time.Duration) error {
-	if db.Redis == nil {
-		return fmt.Errorf("redis not available")
-	}
-
-	data, err := json.Marshal(response)
-	if err != nil {
-		return err
-	}
-
-	return db.Redis.Set(ctx, db.PrefixedKey(key), data, ttl).Err()
 }

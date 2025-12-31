@@ -29,8 +29,8 @@ import (
 
 // ListRequest 排行榜列表请求
 type ListRequest struct {
-	Page     int `form:"page" binding:"omitempty,min=1"`
-	PageSize int `form:"page_size" binding:"omitempty,min=1,max=50"`
+	Page     int `form:"page" binding:"required,min=1"`
+	PageSize int `form:"page_size" binding:"required,min=1,max=50"`
 }
 
 // LeaderboardEntry 排行榜条目
@@ -78,8 +78,8 @@ type MetadataResponse struct {
 // @Tags leaderboard
 // @Accept json
 // @Produce json
-// @Param page query int false "页码"
-// @Param page_size query int false "每页数量"
+// @Param page query int true "页码"
+// @Param page_size query int true "每页数量"
 // @Success 200 {object} util.ResponseAny
 // @Router /api/v1/leaderboard [get]
 func List(c *gin.Context) {

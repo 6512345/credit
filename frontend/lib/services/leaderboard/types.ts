@@ -24,9 +24,9 @@ export interface LeaderboardEntry {
  */
 export interface LeaderboardListRequest {
   /** 页码 */
-  page?: number;
+  page: number;
   /** 每页数量 */
-  page_size?: number;
+  page_size: number;
   /** 索引签名（兼容 BaseService.get 参数类型） */
   [key: string]: unknown;
 }

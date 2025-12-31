@@ -86,7 +86,7 @@ export const useLeaderboard = () => {
 
   React.useEffect(() => {
     const ignore = { current: false };
-    fetchData({}, false, ignore);
+    fetchData({ page: 1, page_size: 50 }, false, ignore);
     fetchMyRank(ignore);
     return () => {
       ignore.current = true;
@@ -105,7 +105,7 @@ export const useLeaderboard = () => {
   }, [data, loadingMore, fetchData]);
 
   const refresh = React.useCallback(() => {
-    fetchData({}, false);
+    fetchData({ page: 1, page_size: 50 }, false);
     fetchMyRank();
   }, [fetchData, fetchMyRank]);
 
