@@ -44,6 +44,7 @@ const PAGE_COMPONENTS: Record<TabValue, React.ComponentType> = {
   transfer: Transfer,
   community: Community,
   online: Online,
+  distribute: () => null,
   test: () => null,
   all: AllActivity,
 }

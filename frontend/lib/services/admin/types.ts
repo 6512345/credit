@@ -56,6 +56,8 @@ export interface UserPayConfig {
   fee_rate: number | string;
   /** 积分费率（0-1之间的小数，最多2位小数） */
   score_rate: number | string;
+  /** 分发费率（0-1之间的小数，最多2位小数） */
+  distribute_rate: number | string;
   /** 创建时间 */
   created_at: string;
   /** 更新时间 */
@@ -78,6 +80,8 @@ export interface CreateUserPayConfigRequest {
   fee_rate: number | string;
   /** 积分费率（0-1之间的小数，最多2位小数） */
   score_rate: number | string;
+  /** 分发费率（0-1之间的小数，最多2位小数） */
+  distribute_rate: number | string;
 }
 
 /**
@@ -94,6 +98,8 @@ export interface UpdateUserPayConfigRequest {
   fee_rate: number | string;
   /** 积分费率（0-1之间的小数，最多2位小数） */
   score_rate: number | string;
+  /** 分发费率（0-1之间的小数，最多2位小数） */
+  distribute_rate: number | string;
 }
 
 // ==================== 任务管理 ====================

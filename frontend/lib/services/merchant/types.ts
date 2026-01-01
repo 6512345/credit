@@ -329,3 +329,28 @@ export interface RefundMerchantOrderResponse {
   msg: string;
 }
 
+/**
+ * 商户分发请求参数
+ */
+export interface MerchantDistributeRequest {
+  /** 接收用户 ID (必填) */
+  user_id: string;
+  /** 接收用户名,用于验证 (必填) */
+  username: string;
+  /** 分发金额 (必填) */
+  amount: number | string;
+  /** 商户订单号 (可选,最大64字符) */
+  out_trade_no?: string;
+  /** 备注 (可选,最大100字符) */
+  remark?: string;
+}
+
+/**
+ * 商户分发响应
+ */
+export interface MerchantDistributeResponse {
+  /** 平台订单号 */
+  trade_no: string;
+  /** 商户订单号 */
+  out_trade_no: string;
+}

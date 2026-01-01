@@ -96,7 +96,7 @@ export function TestModeToggle({ apiKey, onUpdate, updateAPIKey }: TestModeToggl
           ) : (
             <PowerOff className="size-3 mr-1" />
           )}
-          {apiKey.test_mode ? "关闭测试模式" : "开启测试模式"}
+          {apiKey.test_mode ? "关闭测试" : "开启测试"}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

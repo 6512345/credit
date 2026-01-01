@@ -385,12 +385,26 @@ func PayByLink(c *gin.Context) {
 
 			// 非测试模式：扣减用户余额和增加商户余额
 			if !isTestMode {
-				if err := service.DeductUserBalance(tx, currentUser.ID, paymentLink.Amount); err != nil {
+				if err := service.UpdateBalance(tx, service.BalanceUpdateOptions{
+					UserID:       currentUser.ID,
+					Amount:       paymentLink.Amount,
+					Operation:    service.BalanceDeduct,
+					ScoreChange:  paymentLink.Amount.Round(0).IntPart(),
+					TotalField:   "total_payment",
+					CheckBalance: true,
+				}); err != nil {
 					return err
 				}
 
 				merchantScoreIncrease := paymentLink.Amount.Mul(merchantPayConfig.ScoreRate).Round(0).IntPart()
-				if err := service.AddMerchantBalance(tx, merchantUser.ID, merchantAmount, merchantScoreIncrease); err != nil {
+				if err := service.UpdateBalance(tx, service.BalanceUpdateOptions{
+					UserID:       merchantUser.ID,
+					Amount:       merchantAmount,
+					Operation:    service.BalanceAdd,
+					ScoreChange:  merchantScoreIncrease,
+					TotalField:   "total_receive",
+					CheckBalance: false,
+				}); err != nil {
 					return err
 				}
 			}

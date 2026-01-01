@@ -32,12 +32,13 @@ import (
 type OrderType string
 
 const (
-	OrderTypeReceive   OrderType = "receive"
-	OrderTypePayment   OrderType = "payment"
-	OrderTypeTransfer  OrderType = "transfer"
-	OrderTypeCommunity OrderType = "community"
-	OrderTypeOnline    OrderType = "online"
-	OrderTypeTest      OrderType = "test"
+	OrderTypeReceive    OrderType = "receive"
+	OrderTypePayment    OrderType = "payment"
+	OrderTypeTransfer   OrderType = "transfer"
+	OrderTypeCommunity  OrderType = "community"
+	OrderTypeOnline     OrderType = "online"
+	OrderTypeTest       OrderType = "test"
+	OrderTypeDistribute OrderType = "distribute"
 )
 
 type OrderStatus string

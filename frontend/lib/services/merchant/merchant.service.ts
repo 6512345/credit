@@ -14,6 +14,8 @@ import type {
   QueryMerchantOrderResponse,
   RefundMerchantOrderRequest,
   RefundMerchantOrderResponse,
+  MerchantDistributeRequest,
+  MerchantDistributeResponse,
 } from './types';
 
 /**
@@ -434,6 +436,46 @@ export class MerchantService extends BaseService {
     params: RefundMerchantOrderRequest
   ): Promise<RefundMerchantOrderResponse> {
     return this.rawPost<RefundMerchantOrderResponse>('/epay/api.php', params);
+  }
+
+  // ==================== 商户分发 ====================
+
+  /**
+   * 商户向用户分发积分
+   * 
+   * @description
+   * 商户使用此接口向指定用户分发积分。
+   * 需要商户认证（Basic Auth），分发金额会从商户余额中扣除，
+   * 收款人获得扣除分发费率后的金额。
+   * 
+   * @param request - 分发请求参数
+   * @returns 分发结果（包含订单号）
+   * @throws {ValidationError} 当参数验证失败时
+   * @throws {ApiErrorBase} 当余额不足、用户不存在等业务错误时
+   * 
+   * @example
+   * ```typescript
+   * const result = await MerchantService.distribute({
+   *   user_id: '123',
+   *   username: 'alice',
+   *   amount: 100,
+   *   out_trade_no: 'DIST20251231001',
+   *   remark: '新年奖励'
+   * });
+   * console.log('订单号:', result.trade_no);
+   * ```
+   * 
+   * @remarks
+   * - 使用 POST 请求调用 `/pay/distribute` 接口
+   * - 需要通过 Basic Auth 提供商户凭证
+   * - 不能分发给商户自己
+   * - 商户余额必须充足
+   * - 分发会扣除分发费率（根据商户的支付等级）
+   */
+  static async distribute(
+    request: MerchantDistributeRequest
+  ): Promise<MerchantDistributeResponse> {
+    return this.rawPost<MerchantDistributeResponse>('/pay/distribute', request);
   }
 }
 

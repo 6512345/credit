@@ -108,11 +108,7 @@ function MerchantOnlineContent({ apiKeys }: MerchantOnlineContentProps) {
     transactions,
     loading: loadingTransactions,
     error: transactionsError,
-    total,
-    currentPage,
-    totalPages,
     fetchTransactions,
-    loadMore,
     refresh
   } = useTransaction()
 
@@ -502,11 +498,7 @@ function MerchantOnlineContent({ apiKeys }: MerchantOnlineContentProps) {
                   loading={loadingTransactions}
                   error={transactionsError}
                   transactions={transactions}
-                  total={total}
-                  currentPage={currentPage}
-                  totalPages={totalPages}
                   onRetry={refresh}
-                  onLoadMore={loadMore}
                   emptyDescription="暂无在线流转服务数据"
                 />
               </div>
