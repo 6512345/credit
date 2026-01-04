@@ -11,7 +11,6 @@ export interface DeveloperSectionProps {
 
 /**
  * Developer Section - 开发者体验展示
- * 独立组件，使用 React.memo 优化性能
  */
 export const DeveloperSection = React.memo(function DeveloperSection({ className }: DeveloperSectionProps) {
   const [copied, setCopied] = React.useState(false);

@@ -11,7 +11,7 @@ export interface HeroSectionProps {
 }
 
 /**
- * Hero Section
+ * Hero Section - 首页 Hero 展示
  */
 export const HeroSection = React.memo(function HeroSection({ className }: HeroSectionProps) {
   const [balance, setBalance] = React.useState(12450.0);
