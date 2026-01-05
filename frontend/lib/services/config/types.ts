@@ -12,4 +12,6 @@ export interface PublicConfigResponse {
   red_envelope_daily_limit: number;
   /** 红包手续费率（0-1之间的小数） */
   red_envelope_fee_rate: string;
+  /** 每个红包的最大可领取人数上限 */
+  red_envelope_max_recipients: number;
 }

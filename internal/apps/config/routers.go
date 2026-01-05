@@ -27,11 +27,12 @@ import (
 
 // PublicConfigResponse 公共配置响应
 type PublicConfigResponse struct {
-	DisputeTimeWindowHours int             `json:"dispute_time_window_hours"` // 争议时间窗口（小时）
-	RedEnvelopeEnabled     bool            `json:"red_envelope_enabled"`      // 红包功能是否启用
-	RedEnvelopeMaxAmount   decimal.Decimal `json:"red_envelope_max_amount"`   // 单个红包的最大积分上限
-	RedEnvelopeDailyLimit  int             `json:"red_envelope_daily_limit"`  // 每日发红包的个数限制
-	RedEnvelopeFeeRate     decimal.Decimal `json:"red_envelope_fee_rate"`     // 红包手续费率
+	DisputeTimeWindowHours   int             `json:"dispute_time_window_hours"`   // 争议时间窗口（小时）
+	RedEnvelopeEnabled       bool            `json:"red_envelope_enabled"`        // 红包功能是否启用
+	RedEnvelopeMaxAmount     decimal.Decimal `json:"red_envelope_max_amount"`     // 单个红包的最大积分上限
+	RedEnvelopeDailyLimit    int             `json:"red_envelope_daily_limit"`    // 每日发红包的个数限制
+	RedEnvelopeFeeRate       decimal.Decimal `json:"red_envelope_fee_rate"`       // 红包手续费率
+	RedEnvelopeMaxRecipients int             `json:"red_envelope_max_recipients"` // 每个红包的最大可领取人数上限
 }
 
 // GetPublicConfig 获取公共配置
@@ -74,12 +75,19 @@ func GetPublicConfig(c *gin.Context) {
 		return
 	}
 
+	redEnvelopeMaxRecipients, err := model.GetIntByKey(c.Request.Context(), model.ConfigKeyRedEnvelopeMaxRecipients)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, util.Err(err.Error()))
+		return
+	}
+
 	response := PublicConfigResponse{
-		DisputeTimeWindowHours: disputeTimeHours,
-		RedEnvelopeEnabled:     redEnvelopeEnabled,
-		RedEnvelopeMaxAmount:   redEnvelopeMaxAmount,
-		RedEnvelopeDailyLimit:  redEnvelopeDailyLimit,
-		RedEnvelopeFeeRate:     redEnvelopeFeeRate,
+		DisputeTimeWindowHours:   disputeTimeHours,
+		RedEnvelopeEnabled:       redEnvelopeEnabled,
+		RedEnvelopeMaxAmount:     redEnvelopeMaxAmount,
+		RedEnvelopeDailyLimit:    redEnvelopeDailyLimit,
+		RedEnvelopeFeeRate:       redEnvelopeFeeRate,
+		RedEnvelopeMaxRecipients: redEnvelopeMaxRecipients,
 	}
 
 	c.JSON(http.StatusOK, util.OK(response))

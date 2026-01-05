@@ -40,6 +40,7 @@ const (
 	ConfigKeyRedEnvelopeMaxAmount       = "red_envelope_max_amount"       // 单个红包的最大积分上限
 	ConfigKeyRedEnvelopeDailyLimit      = "red_envelope_daily_limit"      // 每日发红包的个数限制
 	ConfigKeyRedEnvelopeFeeRate         = "red_envelope_fee_rate"         // 红包手续费率（0-1之间的小数，0表示不收费）
+	ConfigKeyRedEnvelopeMaxRecipients   = "red_envelope_max_recipients"   // 每个红包的最大可领取人数上限
 )
 
 const (
