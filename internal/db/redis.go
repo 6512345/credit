@@ -21,11 +21,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/linux-do/credit/internal/config"
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 var (
@@ -81,7 +83,14 @@ func init() {
 	}
 
 	// OpenTelemetry 追踪（UniversalClient 兼容）
-	if err := redisotel.InstrumentTracing(Redis); err != nil {
+	if err := redisotel.InstrumentTracing(
+		Redis,
+		redisotel.WithAttributes(
+			attribute.String("db.instance", fmt.Sprintf("%v", cfg.DB)),
+			attribute.String("db.ip", strings.Join(cfg.Addrs, ",")),
+			attribute.String("db.system", "Redis"),
+		),
+	); err != nil {
 		log.Fatalf("[Redis] failed to init trace: %v\n", err)
 	}
 
