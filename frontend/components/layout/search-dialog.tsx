@@ -60,6 +60,13 @@ const tips = [
       <span className="text-muted-foreground/80 lowercase">你知道吗：搜索功能还在持续升级中</span>
     </>
   )
+/*
+  (
+    <>
+      <span className="text-muted-foreground/80 lowercase">有65！w</span>
+    </>
+  )
+*/
 ]
 
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
@@ -129,7 +136,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         onValueChange={setSearch}
       />
       <CommandList>
-        <CommandEmpty>未找到结果</CommandEmpty>
+        <CommandEmpty>没有找到相关内容，换个词试试？</CommandEmpty>
         {Object.entries(groupedResults).map(([category, items]) => {
           const Icon = categoryIcons[category as keyof typeof categoryIcons]
           return (
