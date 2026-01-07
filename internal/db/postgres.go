@@ -1,5 +1,5 @@
 /*
-Copyright 2025 linux.do
+Copyright 2025-2026 linux.do
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/linux-do/credit/internal/config"
+	"go.opentelemetry.io/otel/attribute"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -73,7 +74,17 @@ func init() {
 	}
 
 	// Trace 注入
-	if err = db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
+	if err = db.Use(
+		tracing.NewPlugin(
+			tracing.WithoutMetrics(),
+			tracing.WithAttributes(
+				attribute.String("db.instance", dbConfig.Database),
+				attribute.String("db.ip", dbConfig.Host),
+				attribute.String("server.address", net.JoinHostPort(dbConfig.Host, strconv.Itoa(dbConfig.Port))),
+				attribute.String("db.system", "PostgreSQL"),
+			),
+		),
+	); err != nil {
 		log.Fatalf("[PostgreSQL] init trace failed: %v\n", err)
 	}
 
