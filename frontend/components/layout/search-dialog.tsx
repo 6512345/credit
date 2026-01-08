@@ -33,7 +33,7 @@ const categoryLabels = {
   admin: '管理',
 }
 
-const tips = [
+const getTips = (metaKey: string) => [
   (
     <>
       <span className="text-muted-foreground/80 lowercase">Tips: 还可以使用</span>
@@ -51,47 +51,80 @@ const tips = [
   ),
   (
     <>
-      <span className="text-muted-foreground/80 lowercase">Tips: 按下</span>
+      <span className="text-muted-foreground/80 lowercase">Tips: 按住</span>
+      <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground mx-1">{metaKey}</kbd>
+      <span className="text-muted-foreground/80 lowercase">+</span>
       <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground mx-1">Enter</kbd>
-      <span className="text-muted-foreground/80 lowercase">来跳转到对应页面</span>
+      <span className="text-muted-foreground/80 lowercase">在新标签页打开</span>
     </>
   ),
   (
     <>
       <span className="text-muted-foreground/80 lowercase">你知道吗：搜索功能还在持续升级中</span>
     </>
-  )
-/*
+  ),
   (
     <>
       <span className="text-muted-foreground/80 lowercase">有65！w</span>
     </>
   )
-*/
+
 ]
 
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const router = useRouter()
   const { user } = useUser()
   const [search, setSearch] = useState('')
-  const [currentTip, setCurrentTip] = useState<React.ReactNode>(tips[0])
+  const [currentTip, setCurrentTip] = useState<React.ReactNode>(null)
   const [results, setResults] = useState<SearchItem[]>([])
+  const [metaKey, setMetaKey] = useState("⌘")
+  const [isCtrlPressed, setIsCtrlPressed] = useState(false)
+
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && !navigator.userAgent?.includes("Mac")) {
+      setMetaKey("Ctrl")
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Control' || e.key === 'Meta') {
+        setIsCtrlPressed(true)
+      }
+    }
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Control' || e.key === 'Meta') {
+        setIsCtrlPressed(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
 
   useEffect(() => {
     if (open) {
+      const tips = getTips(metaKey)
       const randomTip = tips[Math.floor(Math.random() * tips.length)]
       setCurrentTip(randomTip)
     }
-  }, [open])
+  }, [open, metaKey])
 
   useEffect(() => {
     const items = searchItems(search, user?.is_admin)
     setResults(items)
   }, [search, user?.is_admin])
 
-  const handleSelect = useCallback((item: SearchItem) => {
+  const handleSelect = useCallback((item: SearchItem, openInNewTab = false) => {
     onOpenChange(false)
-    router.push(item.url)
+    if (openInNewTab) {
+      window.open(item.url, '_blank')
+    } else {
+      router.push(item.url)
+    }
     setSearch('')
   }, [onOpenChange, router])
 
@@ -147,7 +180,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                 <CommandItem
                   key={item.id}
                   value={item.title}
-                  onSelect={() => handleSelect(item)}
+                  onSelect={() => handleSelect(item, isCtrlPressed)}
                   className="flex items-center justify-between"
                 >
                   <div className="flex items-center">
@@ -174,8 +207,9 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
       </CommandList>
       <div className="hidden border-t bg-muted/20 px-4 py-2 md:flex items-center gap-4 text-[10px] text-muted-foreground uppercase tracking-wider font-medium select-none">
         <div className="flex items-center gap-1">
+          {isCtrlPressed && <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground">{metaKey}</kbd>}
           <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground">↵</kbd>
-          <span>打开</span>
+          <span>{isCtrlPressed ? '在新标签页打开' : '打开'}</span>
         </div>
         <div className="flex items-center gap-1">
           <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground">Esc</kbd>
