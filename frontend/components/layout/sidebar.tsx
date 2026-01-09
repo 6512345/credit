@@ -57,6 +57,7 @@ import {
   Globe,
   Layers,
   Trophy,
+  ArrowUpRight,
 } from "lucide-react"
 
 import { useUser } from "@/contexts/user-context"
@@ -324,7 +325,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     >
                       <Link href={item.url} target="_blank" rel="noopener noreferrer" onClick={handleCloseSidebar}>
                         {item.icon && <item.icon />}
-                        <span>{item.title}</span>
+                        <span className="flex-1">{item.title}</span>
+                        <ArrowUpRight className="size-3 text-muted-foreground" />
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
