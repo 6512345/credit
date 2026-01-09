@@ -30,7 +30,6 @@ export const LeaderboardTable = React.memo(function LeaderboardTable({
     getScrollElement: () => parentRef.current,
     estimateSize: () => 64,
     overscan: 5,
-    useFlushSync: false,
   });
 
   const virtualItems = virtualizer.getVirtualItems();

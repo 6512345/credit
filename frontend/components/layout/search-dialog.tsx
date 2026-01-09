@@ -93,6 +93,11 @@ const getTips = (metaKey: string) => [
   ),
   (
     <>
+      <span className="text-muted-foreground/80 lowercase">记得摸摸自己</span>
+    </>
+  ),
+  (
+    <>
       <span className="text-muted-foreground/80 lowercase">遇到问题？欢迎提交</span>
       <a 
         href="https://github.com/linux-do/credit/issues" 
