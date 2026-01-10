@@ -268,7 +268,7 @@ export function RedEnvelopeClaimPage({ id }: RedEnvelopeClaimProps) {
                   </div>
 
                   <ScrollArea className="flex-1 min-h-0">
-                    <div className="space-y-1 sm:space-y-2 pr-3">
+                    <div className="space-y-1 sm:space-y-2">
                       {detail?.claims.map((claim: RedEnvelopeClaim) => (
                         <motion.div
                           key={claim.id}
