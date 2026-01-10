@@ -66,9 +66,8 @@ function TransactionList({ initialType }: { initialType?: OrderType }) {
   const clearAllFilters = () => {
     setSelectedTypes(initialType ? [initialType] : [])
     setSelectedStatuses([])
-    const { from, to: tomorrow } = getDefaultDateRange()
-    setDateRange({ from, to: tomorrow })
-    setSelectedQuickSelection("最近 1 个月")
+    setDateRange(null)
+    setSelectedQuickSelection(null)
     setSelectedSearch({})
 
     /* 重新获取数据 */
@@ -76,8 +75,8 @@ function TransactionList({ initialType }: { initialType?: OrderType }) {
       page: 1,
       page_size: pageSize,
       type: initialType,
-      startTime: formatLocalDate(from),
-      endTime: formatLocalDate(tomorrow),
+      startTime: undefined,
+      endTime: undefined,
     })
   }
 

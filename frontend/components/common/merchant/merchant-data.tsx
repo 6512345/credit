@@ -83,8 +83,8 @@ function MerchantDataContent({ apiKey }: MerchantDataProps) {
   const clearAllFilters = () => {
     setSelectedTypes([])
     setSelectedStatuses([])
-    setDateRange(getDefaultDateRange())
-    setSelectedQuickSelection("最近 1 个月")
+    setDateRange(null)
+    setSelectedQuickSelection(null)
     setSelectedSearch({})
   }
 
