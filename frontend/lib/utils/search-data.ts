@@ -1,12 +1,32 @@
 import PinyinMatch from 'pinyin-match'
 
+type MatchResult = [number, number] | false;
+type MatchFunction = (input: string, keys: string) => MatchResult;
+
 // Handle CJS/ESM interop for pinyin-match
-const match: any = (PinyinMatch as any).default?.match || (PinyinMatch as any).match || PinyinMatch;
+const match = ((): MatchFunction | null => {
+  const p = PinyinMatch as unknown;
+  if (!p) return null;
 
+  // Check for .default.match (common in some ESM bundles)
+  const withDefault = p as { default?: { match?: MatchFunction } };
+  if (typeof withDefault.default?.match === 'function') {
+    return withDefault.default.match;
+  }
 
-/**
- * 搜索项接口
- */
+  // Check for .match (defined in its typings)
+  const withMatch = p as { match?: MatchFunction };
+  if (typeof withMatch.match === 'function') {
+    return withMatch.match;
+  }
+
+  // Check if it's the function itself
+  if (typeof p === 'function') {
+    return p as MatchFunction;
+  }
+
+  return null;
+})();
 export interface SearchItem {
   id: string
   title: string
