@@ -53,7 +53,7 @@ function GeneralNotificationSection() {
             <div>
               <Label htmlFor="system-notifications" className="font-medium">系统通知</Label>
               <p className="text-xs text-muted-foreground mt-1">
-                {isMuted ? "已暂停所有通知推送" : "接收系统的即时通知消息"}
+                {isMuted ? "使用网页弹窗即时通知消息" : "使用系统弹窗即时通知消息"}
               </p>
             </div>
           </div>
@@ -76,7 +76,7 @@ function GeneralNotificationSection() {
             <div>
               <Label htmlFor="notification-sound" className="font-medium">通知音效</Label>
               <p className="text-xs text-muted-foreground mt-1">
-                接收通知时播放提示音（暂不可用）
+                接收通知时播放提示音
               </p>
             </div>
           </div>
