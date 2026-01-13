@@ -162,7 +162,7 @@ const TransactionTableRow = React.memo(React.forwardRef<HTMLTableRowElement, {
         </Badge>
       </TableCell>
       <TableCell className="text-[11px] font-medium whitespace-nowrap text-center py-1">
-        {order.status === 'pending' || order.status === 'expired' || order.type === 'community' ? (
+        {order.status === 'pending' || order.status === 'expired' || order.type === 'community' || order.type === 'red_envelope_send' ? (
           <div className="text-muted-foreground">-</div>
         ) : (
           <TooltipProvider>
