@@ -227,14 +227,16 @@ func Create(c *gin.Context) {
 		}
 
 		order := model.Order{
-			OrderName:   "红包支出",
-			PayerUserID: currentUser.ID,
-			Amount:      totalDeduction,
-			Status:      model.OrderStatusSuccess,
-			Type:        model.OrderTypeRedEnvelopeSend,
-			Remark:      remarkMsg,
-			TradeTime:   time.Now(),
-			ExpiresAt:   time.Now().Add(24 * time.Hour),
+			OrderName:     "红包支出",
+			PayerUserID:   currentUser.ID,
+			PayerUsername: currentUser.Username,
+			PayeeUserID:   0,
+			Amount:        totalDeduction,
+			Status:        model.OrderStatusSuccess,
+			Type:          model.OrderTypeRedEnvelopeSend,
+			Remark:        remarkMsg,
+			TradeTime:     time.Now(),
+			ExpiresAt:     time.Now().Add(24 * time.Hour),
 		}
 
 		return tx.Create(&order).Error
