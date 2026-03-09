@@ -493,7 +493,7 @@ func GetPaymentPageDetails(c *gin.Context) {
 		return
 	}
 
-	redirectURI := cmp.Or(util.DerefString(order.ReturnURL), merchant.RedirectURI)
+	redirectURI := cmp.Or(order.ReturnURL, merchant.RedirectURI)
 
 	c.JSON(http.StatusOK, util.OK(GetOrderResponse{
 		Order:   &order,

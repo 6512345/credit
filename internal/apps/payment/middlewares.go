@@ -36,8 +36,8 @@ type CreateOrderRequest struct {
 	Amount          decimal.Decimal `json:"amount" binding:"required"`
 	Remark          string          `json:"remark" binding:"max=100"`
 	PaymentType     string          `json:"payment_type"`
-	NotifyURL       *string         `json:"notify_url,omitempty"`
-	ReturnURL       *string         `json:"return_url,omitempty"`
+	NotifyURL       string          `json:"notify_url,omitempty"`
+	ReturnURL       string          `json:"return_url,omitempty"`
 }
 
 // EPayRequest 易支付请求
@@ -73,8 +73,8 @@ func NewCreateOrderRequest(orderName string, merchantOrderNo *string, amount dec
 		MerchantOrderNo: merchantOrderNo,
 		Amount:          amount,
 		PaymentType:     payType,
-		NotifyURL:       util.NilIfEmptyString(notifyURL),
-		ReturnURL:       util.NilIfEmptyString(returnURL),
+		NotifyURL:       notifyURL,
+		ReturnURL:       returnURL,
 	}
 }
 
