@@ -17,6 +17,7 @@ limitations under the License.
 package payment
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"log"
@@ -492,7 +493,7 @@ func GetPaymentPageDetails(c *gin.Context) {
 		return
 	}
 
-	redirectURI := ResolveOrderReturnURL(&order, &merchant)
+	redirectURI := cmp.Or(util.DerefString(order.ReturnURL), merchant.RedirectURI)
 
 	c.JSON(http.StatusOK, util.OK(GetOrderResponse{
 		Order:   &order,

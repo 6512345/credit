@@ -23,3 +23,11 @@ func DerefString(s *string) string {
 	}
 	return *s
 }
+
+// NilIfEmptyString 空字符串返回 nil，非空字符串返回指针
+func NilIfEmptyString(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}
