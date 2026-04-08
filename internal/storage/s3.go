@@ -30,7 +30,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/linux-do/credit/internal/config"
+	"github.com/linux-do/credit/internal/otel_trace"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -82,6 +84,10 @@ func init() {
 	log.Printf("[Storage] S3 storage initialized (bucket: %s, prefix: %s, cdn: %s)\n", bucket, keyPrefix, cdnURL)
 }
 
+func IsEnabled() bool {
+	return client != nil
+}
+
 // BuildKey constructs a full S3 object key with the configured prefix.
 func BuildKey(path string) string {
 	return keyPrefix + path
@@ -89,6 +95,13 @@ func BuildKey(path string) string {
 
 // PutObject uploads a file to S3.
 func PutObject(ctx context.Context, key string, body io.Reader, size int64, contentType string) error {
+	ctx, span := otel_trace.Start(ctx, "S3.PutObject", trace.WithSpanKind(trace.SpanKindClient))
+	defer span.End()
+
+	if !IsEnabled() {
+		return ErrS3InitializationFailed{}
+	}
+
 	input := &s3.PutObjectInput{
 		Bucket:        aws.String(bucket),
 		Key:           aws.String(key),
@@ -113,6 +126,13 @@ type ObjectInfo struct {
 
 // GetObject retrieves a file directly from S3.
 func GetObject(ctx context.Context, key string) (*ObjectInfo, error) {
+	ctx, span := otel_trace.Start(ctx, "S3.GetObject", trace.WithSpanKind(trace.SpanKindClient))
+	defer span.End()
+
+	if !IsEnabled() {
+		return nil, ErrS3InitializationFailed{}
+	}
+
 	output, err := client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
@@ -140,6 +160,13 @@ func GetObject(ctx context.Context, key string) (*ObjectInfo, error) {
 
 // GetObjectViaProxy retrieves a file via CDN if configured, otherwise falls back to S3.
 func GetObjectViaProxy(ctx context.Context, key string) (*ObjectInfo, error) {
+	ctx, span := otel_trace.Start(ctx, "S3.GetObjectViaProxy", trace.WithSpanKind(trace.SpanKindClient))
+	defer span.End()
+
+	if !IsEnabled() {
+		return nil, ErrS3InitializationFailed{}
+	}
+
 	if cdnURL == "" {
 		return GetObject(ctx, key)
 	}
@@ -174,6 +201,13 @@ func GetObjectViaProxy(ctx context.Context, key string) (*ObjectInfo, error) {
 
 // DeleteObject deletes a file from S3.
 func DeleteObject(ctx context.Context, key string) error {
+	ctx, span := otel_trace.Start(ctx, "S3.DeleteObject", trace.WithSpanKind(trace.SpanKindClient))
+	defer span.End()
+
+	if !IsEnabled() {
+		return ErrS3InitializationFailed{}
+	}
+
 	_, err := client.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),

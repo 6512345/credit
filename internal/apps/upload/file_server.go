@@ -24,6 +24,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/linux-do/credit/internal/db"
+	"github.com/linux-do/credit/internal/logger"
 	"github.com/linux-do/credit/internal/model"
 	"github.com/linux-do/credit/internal/storage"
 	"gorm.io/gorm"
@@ -71,5 +72,7 @@ func ServeFileByID(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
-	io.Copy(c.Writer, obj.Body)
+	if _, err := io.Copy(c.Writer, obj.Body); err != nil {
+		logger.ErrorF(c.Request.Context(), "Failed to serve file for upload ID %d: %v", uploadID, err)
+	}
 }

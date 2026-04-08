@@ -175,6 +175,8 @@ func UploadRedEnvelopeCover(c *gin.Context) {
 		}
 
 		if err := tx.Create(&upload).Error; err != nil {
+			// 如果数据库保存失败，尝试删除已上传的文件以避免垃圾数据
+			_ = storage.DeleteObject(c.Request.Context(), s3Key)
 			return errors.New(ErrSaveUploadRecordFailed)
 		}
 
