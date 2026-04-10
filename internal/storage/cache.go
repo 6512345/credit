@@ -85,6 +85,8 @@ func GetObjectViaCache(ctx context.Context, key string) (*ObjectInfo, error) {
 
 	// 使用 singleflight 确保同一时间只有一个请求会触发 CDN 获取和本地缓存保存
 	v, err, _ := group.Do(key, func() (interface{}, error) {
+		ctx := context.WithoutCancel(ctx)
+
 		// 没有缓存，通过 CDN 获取
 		objInfo, err := GetObjectViaProxy(ctx, key)
 		if err != nil {
@@ -108,7 +110,7 @@ func GetObjectViaCache(ctx context.Context, key string) (*ObjectInfo, error) {
 			case cacheWriteSem <- struct{}{}:
 				go func() {
 					defer func() { <-cacheWriteSem }()
-					SaveToLocalCache(context.WithoutCancel(ctx), localPath, metaPath, &objCopy)
+					SaveToLocalCache(ctx, localPath, metaPath, &objCopy)
 				}()
 			default:
 				logger.WarnF(ctx, "Local cache is busy, skipping cache save for key: %s", key)
