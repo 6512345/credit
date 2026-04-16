@@ -33,7 +33,7 @@ export const statusConfig: Record<OrderStatus, { label: string; color: string }>
   expired: { label: '已过期', color: 'bg-muted/50 text-gray-800 dark:bg-gray-900 dark:text-gray-300' },
   disputing: { label: '争议中', color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' },
   refund: { label: '已退回', color: 'bg-muted/50 text-gray-800 dark:bg-gray-900 dark:text-gray-300' },
-  refused: { label: '已拒绝', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' },
+  refused: { label: '已拒绝', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' }
 }
 
 export const transferStatusConfig: Record<TransferStatus, { label: string; color: string }> = {
