@@ -427,6 +427,11 @@ const docTemplate = `{
                 ],
                 "parameters": [
                     {
+                        "type": "string",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
                         "minimum": 1,
                         "type": "integer",
                         "name": "page",

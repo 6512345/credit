@@ -29,11 +29,11 @@ export function UsersManager() {
     error,
     page,
     pageSize,
-    searchUsername,
+    searchKeyword,
     statusFilter,
     setPage,
     setPageSize,
-    setSearchUsername,
+    setSearchKeyword,
     setStatusFilter,
     fetchUsers,
     updateUserStatus
@@ -92,12 +92,12 @@ export function UsersManager() {
               size="sm"
               className={cn(
                 "h-5 border-dashed text-[10px] font-medium shadow-none focus-visible:ring-0",
-                searchUsername && "bg-primary/5 border-primary/20"
+                searchKeyword && "bg-primary/5 border-primary/20"
               )}
             >
               <Search className="size-3 mr-1" />
               搜索
-              {searchUsername && (
+              {searchKeyword && (
                 <>
                   <Separator orientation="vertical" className="mx-1" />
                   <Badge
@@ -114,16 +114,16 @@ export function UsersManager() {
             <div className="space-y-2">
               <input
                 className="w-full h-8 px-2 text-xs border border-dashed rounded-md outline-none focus:border-primary bg-background"
-                placeholder="输入用户名搜索..."
-                value={searchUsername}
-                onChange={(e) => setSearchUsername(e.target.value)}
+                placeholder="输入 ID 或 username..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
               />
-              {searchUsername && (
+              {searchKeyword && (
                 <Button
                   variant="ghost"
                   size="sm"
                   className="w-full h-6 text-xs"
-                  onClick={() => setSearchUsername("")}
+                  onClick={() => setSearchKeyword("")}
                 >
                   清除
                 </Button>
@@ -194,14 +194,14 @@ export function UsersManager() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {(searchUsername || statusFilter !== 'all') && (
+        {(searchKeyword || statusFilter !== 'all') && (
           <>
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
-                setSearchUsername("")
+                setSearchKeyword("")
                 setStatusFilter('all')
               }}
               className="h-5 px-2 lg:px-3 text-[11px] font-medium text-muted-foreground hover:text-foreground"

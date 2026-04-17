@@ -9,7 +9,7 @@ import { AdminService, AdminUser, ListUsersRequest } from "@/lib/services"
 export interface UserQueryParams {
   page: number
   page_size: number
-  username?: string
+  keyword?: string
   status?: 'all' | 'active' | 'inactive'
 }
 
@@ -23,13 +23,13 @@ interface AdminUsersContextState {
   // Params
   page: number
   pageSize: number
-  searchUsername: string
+  searchKeyword: string
   statusFilter: 'all' | 'active' | 'inactive'
 
   // Actions
   setPage: (page: number) => void
   setPageSize: (size: number) => void
-  setSearchUsername: (username: string) => void
+  setSearchKeyword: (keyword: string) => void
   setStatusFilter: (status: 'all' | 'active' | 'inactive') => void
 
   fetchUsers: (force?: boolean) => Promise<void>
@@ -51,7 +51,7 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
   // Query Params State
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
-  const [searchUsername, setSearchUsername] = useState("")
+  const [searchKeyword, setSearchKeyword] = useState("")
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [debouncedSearch, setDebouncedSearch] = useState("")
 
@@ -62,13 +62,13 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
   // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearch(searchUsername)
-      if (searchUsername !== debouncedSearch) {
+      setDebouncedSearch(searchKeyword)
+      if (searchKeyword !== debouncedSearch) {
         setPage(1) // Reset to page 1 on search change
       }
     }, 500)
     return () => clearTimeout(timer)
-  }, [searchUsername, debouncedSearch])
+  }, [searchKeyword, debouncedSearch])
 
   const generateCacheKey = (params: UserQueryParams) => {
     return JSON.stringify(params)
@@ -78,7 +78,7 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
     const params: UserQueryParams = {
       page,
       page_size: pageSize,
-      username: debouncedSearch || undefined,
+      keyword: debouncedSearch || undefined,
       status: statusFilter
     }
 
@@ -115,7 +115,7 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
       const requestParams: ListUsersRequest = {
         page,
         page_size: pageSize,
-        username: debouncedSearch || undefined
+        keyword: debouncedSearch || undefined
       }
 
       const response = await AdminService.listUsers(requestParams)
@@ -187,11 +187,11 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
     error,
     page,
     pageSize,
-    searchUsername,
+    searchKeyword,
     statusFilter,
     setPage,
     setPageSize,
-    setSearchUsername,
+    setSearchKeyword,
     setStatusFilter,
     fetchUsers,
     refresh,

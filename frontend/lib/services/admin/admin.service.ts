@@ -325,7 +325,7 @@ export class AdminService extends BaseService {
    * const result = await AdminService.listUsers({
    *   page: 1,
    *   page_size: 20,
-   *   username: 'test'
+   *   keyword: 'test'
    * });
    * console.log('用户总数:', result.total);
    * console.log('用户列表:', result.users);
@@ -334,7 +334,7 @@ export class AdminService extends BaseService {
    * @remarks
    * - page 从 1 开始
    * - page_size 范围 1-100
-   * - username 为可选的用户名前缀过滤
+   * - keyword 可按用户 ID 或用户名搜索
    */
   static async listUsers(request: ListUsersRequest): Promise<ListUsersResponse> {
     return this.get<ListUsersResponse>('/users', request as unknown as Record<string, unknown>);
@@ -368,4 +368,3 @@ export class AdminService extends BaseService {
     return this.put<void>(`/users/${ id }/status`, request);
   }
 }
-

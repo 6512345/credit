@@ -792,6 +792,9 @@ paths:
     get:
       parameters:
       - in: query
+        name: keyword
+        type: string
+      - in: query
         minimum: 1
         name: page
         type: integer

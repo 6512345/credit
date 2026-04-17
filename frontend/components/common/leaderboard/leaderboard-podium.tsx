@@ -15,33 +15,33 @@ interface LeaderboardPodiumProps {
 const rankStyles = {
   1: {
     icon: Crown,
-    iconClassName: "text-amber-500",
-    rowClassName: "h-[68px] grid-cols-[44px_40px_minmax(0,1fr)_112px] bg-amber-500/[0.10] border-amber-400/45 px-4",
-    badgeClassName: "text-amber-700 dark:text-amber-300",
+    iconClassName: "text-amber-500 dark:text-amber-300",
+    rowClassName: "h-[68px] grid-cols-[44px_40px_minmax(0,1fr)_112px] bg-amber-500/[0.10] border-amber-400/45 px-4 dark:bg-amber-300/[0.08] dark:border-amber-200/20",
+    badgeClassName: "text-amber-700 dark:text-amber-200",
     avatarClassName: "size-10",
     nameClassName: "text-sm",
-    metaClassName: "text-amber-700/70 dark:text-amber-200/70",
-    valueClassName: "text-lg leading-none text-amber-700 dark:text-amber-200",
+    metaClassName: "text-amber-700/70 dark:text-amber-100/65",
+    valueClassName: "text-lg leading-none text-amber-700 dark:text-amber-100",
   },
   2: {
     icon: Trophy,
-    iconClassName: "text-slate-500 dark:text-slate-300",
-    rowClassName: "h-[68px] grid-cols-[44px_40px_minmax(0,1fr)_112px] bg-muted/20 border-border/70 px-4",
-    badgeClassName: "text-muted-foreground",
+    iconClassName: "text-slate-500 dark:text-slate-200",
+    rowClassName: "h-[68px] grid-cols-[44px_40px_minmax(0,1fr)_112px] bg-slate-100/70 border-slate-200/80 px-4 dark:bg-slate-200/[0.04] dark:border-slate-200/12",
+    badgeClassName: "text-slate-600 dark:text-slate-200",
     avatarClassName: "size-10",
     nameClassName: "text-sm",
-    metaClassName: "text-muted-foreground",
-    valueClassName: "text-lg leading-none text-foreground",
+    metaClassName: "text-slate-600/75 dark:text-slate-300/70",
+    valueClassName: "text-lg leading-none text-foreground dark:text-slate-100",
   },
   3: {
     icon: Medal,
-    iconClassName: "text-orange-600 dark:text-orange-400",
-    rowClassName: "h-[68px] grid-cols-[44px_40px_minmax(0,1fr)_112px] bg-muted/20 border-border/70 px-4",
-    badgeClassName: "text-muted-foreground",
+    iconClassName: "text-orange-600 dark:text-orange-300",
+    rowClassName: "h-[68px] grid-cols-[44px_40px_minmax(0,1fr)_112px] bg-orange-100/60 border-orange-200/70 px-4 dark:bg-orange-300/[0.05] dark:border-orange-200/12",
+    badgeClassName: "text-orange-700 dark:text-orange-200",
     avatarClassName: "size-10",
     nameClassName: "text-sm",
-    metaClassName: "text-muted-foreground",
-    valueClassName: "text-lg leading-none text-foreground",
+    metaClassName: "text-orange-700/75 dark:text-orange-200/70",
+    valueClassName: "text-lg leading-none text-foreground dark:text-orange-100",
   },
 } as const
 
@@ -97,8 +97,8 @@ export const LeaderboardPodium = React.memo(function LeaderboardPodium({
               className={cn(
                 "grid items-center gap-4 border border-dashed",
                 index === 0
-                  ? "h-[68px] grid-cols-[44px_40px_minmax(0,1fr)_112px] border-amber-400/35 px-4"
-                  : "h-[68px] grid-cols-[44px_40px_minmax(0,1fr)_112px] border-border/70 px-4"
+                  ? "h-[68px] grid-cols-[44px_40px_minmax(0,1fr)_112px] border-amber-400/35 px-4 dark:border-amber-200/20"
+                  : "h-[68px] grid-cols-[44px_40px_minmax(0,1fr)_112px] border-border/70 px-4 dark:border-border/40"
               )}
             >
               <Skeleton className="h-5 w-5" />
