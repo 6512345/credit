@@ -801,6 +801,9 @@ paths:
         name: page_size
         type: integer
       - in: query
+        name: user_id
+        type: integer
+      - in: query
         name: username
         type: string
       produces:

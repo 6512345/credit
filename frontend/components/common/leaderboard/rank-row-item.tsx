@@ -17,7 +17,7 @@ export const RankRowItem = React.memo(function RankRowItem({
   entry,
   rank,
   isCurrentUser,
-  metaLabel = "排名用户",
+  metaLabel,
   pinned = false,
 }: RankRowItemProps) {
   return (
@@ -39,7 +39,9 @@ export const RankRowItem = React.memo(function RankRowItem({
         </Avatar>
         <div className="min-w-0">
           <div className="truncate text-sm font-medium">{entry.username}</div>
-          <div className="text-[11px] text-muted-foreground">{metaLabel}</div>
+          {metaLabel && (
+            <div className={cn("text-[11px]", pinned ? "text-foreground/80" : "text-muted-foreground")}>{metaLabel}</div>
+          )}
         </div>
       </div>
 

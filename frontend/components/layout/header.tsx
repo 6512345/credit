@@ -11,6 +11,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 import { SearchDialog } from "@/components/layout/search-dialog"
+import { Kbd } from "@/components/ui/kbd"
 
 
 /**
@@ -98,11 +99,12 @@ export function SiteHeader({ isFullWidth = false, onToggleFullWidth }: { isFullW
         <div className={`hidden md:flex w-full items-center gap-4 transition-all duration-300 ease-in-out ${!isFullWidth ? "max-w-[1320px]" : "max-w-full"} mx-auto px-12`}>
           <div className="relative w-64 cursor-pointer" onClick={() => setSearchOpen(true)}>
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <div className="h-8 border-none bg-muted/100 pl-10 pr-3 text-sm rounded-md flex items-center text-muted-foreground">
+            <div className="flex h-8 items-center rounded-md border border-border/60 bg-muted/70 pl-10 pr-2.5 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-muted">
               <span>搜索</span>
-              <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                <span className="text-xs">{metaKey}</span>K
-              </kbd>
+              <Kbd className="ml-auto gap-0.5 font-mono">
+                <span>{metaKey}</span>
+                <span>K</span>
+              </Kbd>
             </div>
           </div>
 

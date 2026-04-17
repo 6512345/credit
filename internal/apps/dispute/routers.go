@@ -342,7 +342,7 @@ func RefundReview(c *gin.Context) {
 				updateData := map[string]interface{}{
 					"status":          model.DisputeStatusClosed,
 					"handler_user_id": merchantUser.ID,
-					"reason":          dispute.Reason + " [受托方拒绝理由: " + req.Reason + "]",
+					"reason":          dispute.Reason + " [服务方拒绝理由: " + req.Reason + "]",
 				}
 
 				if err := tx.Model(&model.Dispute{}).

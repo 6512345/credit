@@ -10,6 +10,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
+import { Kbd, KbdGroup } from "@/components/ui/kbd"
 import { searchItems, type SearchItem } from "@/lib/utils/search-data"
 import { Home, Settings, FileText, Shield } from "lucide-react"
 import { useUser } from "@/contexts/user-context"
@@ -37,24 +38,24 @@ const getTips = (metaKey: string) => [
   (
     <>
       <span className="text-muted-foreground/80 lowercase">Tips: 还可以使用</span>
-      <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground mx-1">/</kbd>
+      <Kbd className="mx-1">/</Kbd>
       <span className="text-muted-foreground/80 lowercase">来打开此界面</span>
     </>
   ),
   (
     <>
       <span className="text-muted-foreground/80 lowercase">Tips: 使用</span>
-      <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground mx-1">↑</kbd>
-      <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground mx-1">↓</kbd>
+      <Kbd className="mx-1">↑</Kbd>
+      <Kbd className="mx-1">↓</Kbd>
       <span className="text-muted-foreground/80 lowercase">来切换选中项</span>
     </>
   ),
   (
     <>
       <span className="text-muted-foreground/80 lowercase">Tips: 按住</span>
-      <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground mx-1">{metaKey}</kbd>
+      <Kbd className="mx-1">{metaKey}</Kbd>
       <span className="text-muted-foreground/80 lowercase">+</span>
-      <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground mx-1">↵</kbd>
+      <Kbd className="mx-1">↵</Kbd>
       <span className="text-muted-foreground/80 lowercase">在新标签页打开</span>
     </>
   ),
@@ -196,7 +197,12 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   }, {} as Record<string, SearchItem[]>)
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange} shouldFilter={false}>
+    <CommandDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      shouldFilter={false}
+      className="max-w-[calc(100%-1.5rem)] sm:max-w-[500px] md:max-w-[540px]"
+    >
       <CommandInput
         placeholder="搜索页面和功能..."
         value={search}
@@ -215,9 +221,11 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                   onSelect={() => handleSelect(item, isCtrlPressed)}
                   className="flex items-center justify-between"
                 >
-                  <div className="flex items-center">
-                    <Icon className="mr-2 h-4 w-4" />
-                    <div className="flex flex-col">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted/70">
+                      <Icon className="size-4" />
+                    </div>
+                    <div className="flex min-w-0 flex-col">
                       <span>
                         {item.matchRange ? (
                           <>
@@ -231,10 +239,10 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                           item.title
                         )}
                       </span>
-                      <span className="text-xs text-muted-foreground">{item.description}</span>
+                      <span className="truncate text-[11px] leading-4 text-muted-foreground">{item.description}</span>
                     </div>
                   </div>
-                  <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md font-medium">
+                  <span className="ml-3 shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-[10px] leading-none font-medium text-muted-foreground">
                     {categoryLabels[item.category as keyof typeof categoryLabels]}
                   </span>
                 </CommandItem>
@@ -243,14 +251,16 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
           )
         })}
       </CommandList>
-      <div className="hidden border-t bg-muted/20 px-4 py-2 md:flex items-center gap-4 text-[10px] text-muted-foreground uppercase tracking-wider font-medium select-none">
+      <div className="hidden border-t bg-muted/20 px-4 py-2.5 md:flex items-center gap-4 text-[10px] text-muted-foreground uppercase tracking-wider font-medium select-none">
         <div className="flex items-center gap-1">
-          {isCtrlPressed && <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground">{metaKey}</kbd>}
-          <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground">↵</kbd>
+          <KbdGroup>
+            {isCtrlPressed && <Kbd>{metaKey}</Kbd>}
+            <Kbd>↵</Kbd>
+          </KbdGroup>
           <span>{isCtrlPressed ? '在新标签页打开' : '打开'}</span>
         </div>
         <div className="flex items-center gap-1">
-          <kbd className="bg-muted px-1.5 py-0.5 rounded border shadow-sm text-foreground">Esc</kbd>
+          <Kbd>Esc</Kbd>
           <span>关闭搜索界面</span>
         </div>
         <div className="ml-auto flex items-center gap-1">

@@ -288,12 +288,12 @@ const TransactionTableRow = React.memo(React.forwardRef<HTMLTableRowElement, {
 
         {/* 场景2：消费方查看正在进行的争议 */}
         {isDisputeSupported && isCurrentUserPayer && order.status === 'disputing' && (
-          <ViewDisputeHistoryDialog order={order} />
+          <ViewDisputeHistoryDialog order={order} viewer="payer" />
         )}
 
         {/* 场景3：消费方查看已处理的争议（拒绝或退款） */}
         {isDisputeSupported && isCurrentUserPayer && (order.status === 'refused' || order.status === 'refund') && (
-          <ViewDisputeHistoryDialog order={order} />
+          <ViewDisputeHistoryDialog order={order} viewer="payer" />
         )}
 
         {/* 场景4：服务方处理正在进行的争议 */}
@@ -303,7 +303,7 @@ const TransactionTableRow = React.memo(React.forwardRef<HTMLTableRowElement, {
 
         {/* 场景5：服务方查看已处理的争议（拒绝或退款） */}
         {isDisputeSupported && isCurrentUserPayee && (order.status === 'refused' || order.status === 'refund') && (
-          <ViewDisputeHistoryDialog order={order} />
+          <ViewDisputeHistoryDialog order={order} viewer="payee" />
         )}
       </TableCell>
     </TableRow>

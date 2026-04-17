@@ -18,6 +18,7 @@ package user
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -30,9 +31,10 @@ import (
 
 // listUsersRequest 用户列表查询请求
 type listUsersRequest struct {
-	Page     int    `form:"page" binding:"min=1"`
-	PageSize int    `form:"page_size" binding:"min=1,max=100"`
-	Username string `form:"username"`
+	Page     int     `form:"page" binding:"min=1"`
+	PageSize int     `form:"page_size" binding:"min=1,max=100"`
+	UserID   *uint64 `form:"user_id" binding:"omitempty,gt=0"`
+	Username string  `form:"username"`
 }
 
 type user struct {
@@ -79,8 +81,14 @@ func ListUsers(c *gin.Context) {
 
 	query := db.DB(c.Request.Context()).Table("users")
 
-	if req.Username != "" {
-		query = query.Where("username LIKE ?", req.Username+"%")
+	username := strings.TrimSpace(req.Username)
+
+	if req.UserID != nil {
+		query = query.Where("id = ?", *req.UserID)
+	}
+
+	if username != "" {
+		query = query.Where("username LIKE ?", username+"%")
 	}
 
 	if err := query.Count(&total).Error; err != nil {
