@@ -98,3 +98,8 @@ export interface CreateDisputeRequest {
   /** 争议原因（最大 100 字符） */
   reason: string;
 }
+
+/**
+ * 创建争议响应
+ */
+export interface CreateDisputeResponse extends Dispute {}

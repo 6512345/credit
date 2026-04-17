@@ -28,6 +28,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { typeConfig } from "@/components/common/general/table-filter"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
+type DisputeViewer = 'payer' | 'payee'
+
 /**
  * 活动详情弹窗
  */
@@ -190,9 +192,12 @@ export function CreateDisputeDialog({ order, onSuccess }: { order: Order; onSucc
 
     try {
       setLoading(true)
-      await DisputeService.createDispute({ order_id: order.id, reason: reason.trim() })
+      const dispute = await DisputeService.createDispute({ order_id: order.id, reason: reason.trim() })
       toast.success('争议已发起', { description: '请等待服务方处理' })
-      updateOrderStatus(order.id, { status: 'disputing' })
+      updateOrderStatus(order.id, {
+        status: 'disputing',
+        dispute_id: dispute.id
+      })
       setOpen(false)
       onSuccess?.()
     } catch (error: unknown) {
@@ -348,7 +353,7 @@ export function CancelDisputeDialog({ order, onSuccess }: { order: Order; onSucc
 /**
  * 查看争议历史弹窗
  */
-export function ViewDisputeHistoryDialog({ order }: { order: Order }) {
+export function ViewDisputeHistoryDialog({ order, viewer = 'payer' }: { order: Order; viewer?: DisputeViewer }) {
   const [open, setOpen] = useState(false)
   const [disputeHistory, setDisputeHistory] = useState<Dispute | null>(null)
   const [fetchingHistory, setFetchingHistory] = useState(false)
@@ -400,11 +405,15 @@ export function ViewDisputeHistoryDialog({ order }: { order: Order }) {
         return
       }
 
-      const res = await DisputeService.listDisputes({
+      const params = {
         page: 1,
         page_size: 1,
         dispute_id: order.dispute_id
-      })
+      }
+
+      const res = viewer === 'payee'
+        ? await DisputeService.listMerchantDisputes(params)
+        : await DisputeService.listDisputes(params)
 
       if (res.disputes && res.disputes.length > 0) {
         setDisputeHistory(res.disputes[0])
@@ -430,7 +439,7 @@ export function ViewDisputeHistoryDialog({ order }: { order: Order }) {
   }
 
   const parseDisputeReason = (fullReason: string) => {
-    const match = fullReason.match(/^(.*?)\[服务方拒绝理由: (.*?)\]$/)
+    const match = fullReason.match(/^(.*?)\s*\[(?:服务方|受托方)拒绝理由:\s*(.*?)\]$/)
     if (match) {
       return { userReason: match[1].trim(), merchantReason: match[2].trim() }
     }

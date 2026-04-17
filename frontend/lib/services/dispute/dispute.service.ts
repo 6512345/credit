@@ -5,6 +5,7 @@ import type {
   RefundReviewRequest,
   CloseDisputeRequest,
   CreateDisputeRequest,
+  CreateDisputeResponse,
 } from './types';
 
 /**
@@ -30,8 +31,8 @@ export class DisputeService extends BaseService {
    * });
    * ```
    */
-  static async createDispute(data: CreateDisputeRequest): Promise<void> {
-    return this.post('/dispute', data);
+  static async createDispute(data: CreateDisputeRequest): Promise<CreateDisputeResponse> {
+    return this.post<CreateDisputeResponse>('/dispute', data);
   }
 
   /**
