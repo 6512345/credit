@@ -115,7 +115,12 @@ func HandleAutoRefundSingleDispute(ctx context.Context, t *asynq.Task) error {
 
 		var order model.Order
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE", Options: "NOWAIT"}).
-			Where("id = ? AND status = ? AND type = ?", dispute.OrderID, model.OrderStatusDisputing, model.OrderTypePayment).
+			Where(
+				"id = ? AND status = ? AND type IN ?",
+				dispute.OrderID,
+				model.OrderStatusDisputing,
+				[]model.OrderType{model.OrderTypePayment, model.OrderTypeOnline},
+			).
 			First(&order).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				logger.ErrorF(ctx, "争议[ID:%d]关联订单[ID:%d]不存在或状态异常", payload.DisputeID, dispute.OrderID)
