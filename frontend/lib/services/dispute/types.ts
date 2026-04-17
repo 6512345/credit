@@ -102,4 +102,4 @@ export interface CreateDisputeRequest {
 /**
  * 创建争议响应
  */
-export interface CreateDisputeResponse extends Dispute {}
+export type CreateDisputeResponse = Dispute;
